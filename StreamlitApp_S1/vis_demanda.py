@@ -22,7 +22,7 @@ def vis_demanda():
 
     st.markdown("#### Demanda Eléctrica en España")
     with st.expander(label = "Dataset: Demanda", expanded = False):
-        df = pd.read_csv('../SPRINT1PRUEBAS/Data/DF DEMANDA_20_25_LIMPIO_V1.csv')
+        df = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_DEMANDA_10_25_LIMPIO_V1.csv')
         df = df[df['titulo'] == 'Demanda']
         st.dataframe(df) 
 
@@ -48,7 +48,7 @@ def vis_demanda():
                   y = "valor", 
                   color='zona', 
                   title = f"Demanda eléctrica en España de los últimos {periodo_seleccionado} días",
-                  labels={'fecha': "Fecha", 'valor': "Demanda (MW)", 'zona': "Zona"}
+                  labels={'fecha': "Fecha", 'valor': "Demanda (MWh)", 'zona': "Zona"}
                   )
     
     st.plotly_chart(fig)

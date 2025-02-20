@@ -20,10 +20,10 @@ def vis_compare():
 
     # 3ª gráfica: Comparación de dos años
 
-    df_demanda = pd.read_csv('../SPRINT1PRUEBAS/Data/DF DEMANDA_20_25_LIMPIO_V1.csv')
-    df_generacion = pd.read_csv('../SPRINT1PRUEBAS/Data/DF GENERACION_20_25_LIMPIO_V1.csv')
-    df_intercambios = pd.read_csv('../SPRINT1PRUEBAS/Data/DF INTERCAMBIOS_20_25_LIMPIO_V1.csv')
-    df_balance = pd.read_csv('../SPRINT1PRUEBAS/Data/DF_BALANCE_20_25_LIMPIO_V1.csv')
+    df_demanda = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_DEMANDA_10_25_LIMPIO_V1.csv')
+    df_generacion = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_GENERACION_10_25_LIMPIO_V1.csv')
+    df_intercambios = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
+    df_balance = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_BALANCE_10_25_LIMPIO_V1.csv')
 
     variables = {
 
@@ -99,7 +99,7 @@ def vis_compare():
                        color=color,
                        line_dash=ldash,
                        title = f"{variable} en los años {year1} y {year2}",
-                       labels={'mes': "Mes", 'valor': "Demanda (MW)", 'zona': "Zona"}
+                       labels={'mes': "Mes", 'valor': f"{variable} (MWh)", 'zona': "Zona"}
                        )
         st.plotly_chart(fig1)
 

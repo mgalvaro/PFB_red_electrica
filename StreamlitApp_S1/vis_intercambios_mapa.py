@@ -28,7 +28,7 @@ def vis_intercambios():
     
     st.markdown("#### Intercambios de Energía con otros Países")
     with st.expander(label = "Dataset: Intercambios", expanded = False):
-        df = pd.read_csv('../SPRINT1PRUEBAS/Data/DF INTERCAMBIOS_20_25_LIMPIO_V1.csv')
+        df = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
         df = df[df['frontera'].isin(coord_paises['frontera'])]
         st.dataframe(df)
 
