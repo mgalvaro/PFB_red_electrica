@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pandas as pd
 
 def p7_30_365_hist(df, p):
 

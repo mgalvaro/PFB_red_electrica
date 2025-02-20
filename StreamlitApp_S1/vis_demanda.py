@@ -1,14 +1,8 @@
 import streamlit as st
 
 import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-
-import seaborn as sns
 import plotly.express as px
 
-from data_extraction import extrae_demanda, extrae_demanda_horaria
-from data_cleaning import divide_fecha, limpia_columnas
 from filtros_visualizaciones import *
 
 #_____________________
