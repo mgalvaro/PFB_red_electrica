@@ -33,8 +33,8 @@ def filtro_intercambios(df, year1, year2):
 
     df = df[(df['año'] == year1) | (df['año'] == year2)]
     df = df[df['frontera'].isin(['Francia', 'Portugal', 'Marruecos', 'Andorra'])].reset_index(drop=True)
-    df = df.groupby(['mes', 'tipo', 'año']).sum('valor').reset_index()
-    df['valor'] = df['valor'].apply(lambda x: abs(x))
+    df = df.groupby(['mes', 'tipo', 'año']).sum('valor_(MWh)').reset_index()
+    df['valor_(MWh)'] = df['valor_(MWh)'].apply(lambda x: abs(x))
     
     return df
 

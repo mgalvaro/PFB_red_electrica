@@ -1,5 +1,7 @@
 import streamlit as st
 
+import os
+
 import pandas as pd
 import plotly.express as px
 
@@ -11,6 +13,7 @@ from filtros_visualizaciones import *
 def vis_demanda():
 
     # 1ª gráfica: Serie temporal de Demanda
+    st.write(os.getcwd())
 
     periodos_dict = {
 
@@ -22,7 +25,7 @@ def vis_demanda():
 
     st.markdown("#### Demanda Eléctrica en España")
     with st.expander(label = "Dataset: Demanda", expanded = False):
-        df = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_DEMANDA_10_25_LIMPIO_V1.csv')
+        df = pd.read_csv('../data/processed/DF_ DEMANDA_10_25_LIMPIO_V1.csv') 
         df = df[df['titulo'] == 'Demanda']
         st.dataframe(df) 
 
@@ -45,10 +48,10 @@ def vis_demanda():
         
     fig = px.line(df_filtered, 
                   x = "fecha", 
-                  y = "valor", 
+                  y = "valor_(MWh)", 
                   color='zona', 
                   title = f"Demanda eléctrica en España de los últimos {periodo_seleccionado} días",
-                  labels={'fecha': "Fecha", 'valor': "Demanda (MWh)", 'zona': "Zona"}
+                  labels={'fecha': "Fecha", 'valor_(MWh)': "Demanda (MWh)", 'zona': "Zona"}
                   )
     
     st.plotly_chart(fig)

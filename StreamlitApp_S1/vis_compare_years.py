@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import seaborn as sns
 import plotly.express as px
 
-from data_extraction import extrae_demanda, extrae_demanda_horaria, extrae_balance, extrae_intercambios, extrae_generacion
 from filtros_visualizaciones import *
 # from data_cleaning import divide_fecha, limpia_columnas
 # from parametros import variables
@@ -20,10 +19,10 @@ def vis_compare():
 
     # 3ª gráfica: Comparación de dos años
 
-    df_demanda = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_DEMANDA_10_25_LIMPIO_V1.csv')
-    df_generacion = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_GENERACION_10_25_LIMPIO_V1.csv')
-    df_intercambios = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
-    df_balance = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_BALANCE_10_25_LIMPIO_V1.csv')
+    df_demanda = pd.read_csv('../data/processed/DF_ DEMANDA_10_25_LIMPIO_V1.csv')
+    df_generacion = pd.read_csv('../data/processed/DF_GENERACION_10_25_LIMPIO_V1.csv')
+    df_intercambios = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
+    df_balance = pd.read_csv('../data/processed/DF_BALANCE_10_25_LIMPIO_V1.csv')
 
     variables = {
 
@@ -64,19 +63,19 @@ def vis_compare():
         if variables[variable] == 1:
             df = df_demanda[df_demanda['titulo'] == 'Demanda']
             df = df[(df['año'] == year1) | (df['año'] == year2)]
-            df = df.groupby(['mes', 'año']).sum('valor').reset_index()
+            df = df.groupby(['mes', 'año']).sum('valor_(MWh)').reset_index()
 
         elif variables[variable] == 2:
             df = df_balance
             df = df[df['zona'] == 'nacional']
             df = df[(df['año'] == year1) | (df['año'] == year2)]
-            df = df.groupby(['mes', 'año']).sum('valor').reset_index()
+            df = df.groupby(['mes', 'año']).sum('valor_(MWh)').reset_index()
 
         elif variables[variable] == 3:
             df = df_generacion
             df = df[df['zona'] == 'nacional']
             df = df[(df['año'] == year1) | (df['año'] == year2)]
-            df = df.groupby(['mes', 'año']).sum('valor').reset_index()
+            df = df.groupby(['mes', 'año']).sum('valor_(MWh)').reset_index()
 
         else:
             df = df_intercambios#[df_intercambios['zona'].isin(['Francia', 'Portugal', 'Marruecos', 'Andorra'])].groupby(by=['fecha'])
@@ -88,24 +87,24 @@ def vis_compare():
         df2 = df[df['año'] == year2]
         df = pd.concat([df1, df2], ignore_index=True)
 
-        media = df['valor'].mean()
-        mediana = df['valor'].median()
-        maximo = df['valor'].max()
-        minimo = df['valor'].min()
+        media = df['valor_(MWh)'].mean()
+        mediana = df['valor_(MWh)'].median()
+        maximo = df['valor_(MWh)'].max()
+        minimo = df['valor_(MWh)'].min()
 
         fig1 = px.line(data_frame=df,
                        x='mes',
-                       y='valor',
+                       y='valor_(MWh)',
                        color=color,
                        line_dash=ldash,
                        title = f"{variable} en los años {year1} y {year2}",
-                       labels={'mes': "Mes", 'valor': f"{variable} (MWh)", 'zona': "Zona"}
+                       labels={'mes': "Mes", 'valor_(MWh)': f"{variable} (MWh)", 'zona': "Zona"}
                        )
         st.plotly_chart(fig1)
 
         estadisticas = pd.DataFrame({
                                     'Estadística': ['Media', 'Mediana', 'Máximo', 'Mínimo'],
-                                    'Valor': [media, mediana, maximo, minimo]
+                                    'valor_': [media, mediana, maximo, minimo]
                                 })
 
         st.table(estadisticas)

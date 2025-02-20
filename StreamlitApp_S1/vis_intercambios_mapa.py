@@ -28,7 +28,7 @@ def vis_intercambios():
     
     st.markdown("#### Intercambios de Energía con otros Países")
     with st.expander(label = "Dataset: Intercambios", expanded = False):
-        df = pd.read_csv('../data/processed/SPRINT1PRUEBAS/Data/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
+        df = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
         df = df[df['frontera'].isin(coord_paises['frontera'])]
         st.dataframe(df)
 
@@ -43,10 +43,10 @@ def vis_intercambios():
     df_filtered = p7_30_365_hist(df, periodo_seleccionado)[0]
     periodo_seleccionado = p7_30_365_hist(df, periodo_seleccionado)[1]
 
-    df_intercambio_total = df_filtered.groupby(['frontera','tipo'])['valor'].sum().reset_index()
+    df_intercambio_total = df_filtered.groupby(['frontera','tipo'])['valor_(MWh)'].sum().reset_index()
 
-    exportacion_total = df_intercambio_total.groupby('tipo').sum()['valor'].values[0]
-    importacion_total = df_intercambio_total.groupby('tipo').sum()['valor'].values[1]
+    exportacion_total = df_intercambio_total.groupby('tipo').sum()['valor_(MWh)'].values[0]
+    importacion_total = df_intercambio_total.groupby('tipo').sum()['valor_(MWh)'].values[1]
 
     df_intercambio_total.loc[len(df_intercambio_total)] = ['Intercambios', 'export', exportacion_total]
     df_intercambio_total.loc[len(df_intercambio_total)] = ['Intercambios', 'import', importacion_total]
@@ -70,8 +70,8 @@ def vis_intercambios():
         row = df_intercambio_total[df_intercambio_total['frontera'] == pais].reset_index(drop=True)
         
         if not row.empty:  # Verificamos si el país tiene datos
-            exp = row[row['tipo'] == 'export']['valor'].values[0]
-            imp = row[row['tipo'] == 'import']['valor'].values[0]
+            exp = row[row['tipo'] == 'export']['valor_(MWh)'].values[0]
+            imp = row[row['tipo'] == 'import']['valor_(MWh)'].values[0]
             saldo = exp + imp
 
             popup_html = f"""
@@ -94,29 +94,21 @@ def vis_intercambios():
                 icon=folium.Icon(color=color, icon="bolt", prefix="fa")
             ).add_to(spain_map)
 
-    folium.GeoJson(
-        geo_json_data,
-        name="Intercambios Energéticos",
-        style_function=lambda feature: {
-            "fillColor": (
-                "green" if (
-                    feature["properties"]["ADMIN"] in df_intercambio_total["frontera"].values and saldo < 0,
-                    # df_intercambio_total.loc[df_intercambio_total["frontera"] == feature["properties"]["ADMIN"], "valor"].values[0] < 0
-                ) else 
-                "red" if (
-                    feature["properties"]["ADMIN"] in df_intercambio_total["frontera"].values and saldo > 0
-                    # df_intercambio_total.loc[df_intercambio_total["frontera"] == feature["properties"]["ADMIN"], "valor"].values[0] > 0
-                ) else 
-                "gray"
-            ),
-            "color": "black",
-            "weight": 1,
-            "fillOpacity": 0.7
-        },
-        tooltip=folium.GeoJsonTooltip(
-            fields=["ADMIN"], aliases=["País:"], sticky=False
-        )
-    ).add_to(spain_map)
+        else:
+            color = 'grey'
+
+        folium.Choropleth(
+            geo_data=geo_json_data,
+            data=messed_up_data,
+            columns=["State", "Unemployment"],
+            nan_fill_color="purple",
+            nan_fill_opacity=0.4,
+            key_on="feature.id",
+            fill_color="YlGn",
+        ).add_to(spain_map)
+                
+
+
 
 
 
@@ -127,7 +119,7 @@ def vis_intercambios():
     #     name="Intercambios Energéticos",
     #     style_function=lambda feature: {
     #         "fillColor": colormap(df_intercambio_total.loc[
-    #             df_intercambio_total["frontera"] == feature["properties"]["ADMIN"], "valor"
+    #             df_intercambio_total["frontera"] == feature["properties"]["ADMIN"], "valor_(MWh)"
     #         ].values[0]) if feature["properties"]["ADMIN"] in df_intercambio_total["frontera"].values else "gray",
     #         "color": "black",
     #         "weight": 1,
