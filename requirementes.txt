@@ -1,6 +1,5 @@
 streamlit
 pandas
-plotly
 numpy
 matplotlib
 seaborn
@@ -8,3 +7,4 @@ scikit-learn
 folium
 streamlit_folium
 json
+plotly
