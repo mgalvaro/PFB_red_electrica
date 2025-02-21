@@ -48,15 +48,25 @@ def vis_intercambios():
     exportacion_total = df_intercambio_total.groupby('tipo').sum()['valor_(MWh)'].values[0]
     importacion_total = df_intercambio_total.groupby('tipo').sum()['valor_(MWh)'].values[1]
 
-    df_intercambio_total.loc[len(df_intercambio_total)] = ['Intercambios', 'export', exportacion_total]
-    df_intercambio_total.loc[len(df_intercambio_total)] = ['Intercambios', 'import', importacion_total]
-    with st.expander(label = "Dataset de Intercambios Filtrado", expanded = False):
-        st.dataframe(df_intercambio_total)
+    exportacion_total = df_intercambio_total.groupby('tipo').sum()['valor_(MWh)'].values[0]
+    importacion_total = df_intercambio_total.groupby('tipo').sum()['valor_(MWh)'].values[1]
 
+    intercambios_nac = {
+        'frontera': ['Intercambios', 'Intercambios'],
+        'tipo': ['export', 'import'],
+        'valor_(MWh)': [exportacion_total, importacion_total]
+    }
+
+    intercambios_nac = pd.DataFrame(intercambios_nac)
+    df_intercambio_total = pd.concat([df_intercambio_total, intercambios_nac])
     df_intercambio_total = df_intercambio_total.merge(df_coord, on='frontera', how='left')
+    df_saldo = df_intercambio_total.groupby('frontera').sum().reset_index()
+    df_saldo['tipo'] = df_saldo['tipo'].apply(lambda x: 'saldo')
+    df_saldo = pd.concat([df_intercambio_total, df_saldo]).reset_index(drop=True)
 
-    # with st.expander(label = "Dataset de Intercambios Filtrado", expanded = False):
-    #     st.dataframe(df_intercambio_total)
+    with st.expander(label = "Dataset de Intercambios Filtrado", expanded = False):
+        st.dataframe(df_saldo)
+
 
     geo_json_path = "world_countries.json"
     with open(geo_json_path, "r", encoding="utf-8") as file:
@@ -64,74 +74,45 @@ def vis_intercambios():
 
     spain_map = folium.Map(location=[40.4637, -3.7492], tiles="openstreetmap", zoom_start=5, min_zoom=5, max_zoom=7, max_bounds=True)
 
+    geo_json_path = "./StreamlitApp_S1/world_countries.json"
 
-    for pais, lat, lon in zip(df_coord["frontera"], df_coord["latitud"], df_coord["longitud"]):
-        
-        row = df_intercambio_total[df_intercambio_total['frontera'] == pais].reset_index(drop=True)
-        
-        if not row.empty:  # Verificamos si el país tiene datos
-            exp = row[row['tipo'] == 'export']['valor_(MWh)'].values[0]
-            imp = row[row['tipo'] == 'import']['valor_(MWh)'].values[0]
-            saldo = exp + imp
+    for pais, lat, lon in zip(df_coord['frontera'], df_coord['latitud'], df_coord['longitud']):
 
-            popup_html = f"""
+        exp = df_saldo[(df_saldo['tipo'] == 'export') & (df_saldo['frontera'] == pais)]['valor_(MWh)']* 0.001
+        imp = df_saldo[(df_saldo['tipo'] == 'import') & (df_saldo['frontera'] == pais)]['valor_(MWh)'] * 0.001
+        saldo = df_saldo[(df_saldo['tipo'] == 'saldo') & (df_saldo['frontera'] == pais)]['valor_(MWh)'] * 0.001
+
+        popup_html = f"""
             <div style="width: 250px; font-size: 14px;">
-            <b>{pais}</b><br>
-            📤 Exportado: {exp:,} MWh<br>
-            📥 Importado: {imp:,} MWh<br>
-            ⚖️ Saldo: {saldo:,} MWh
+            <b>📍{pais}</b><br>
+            📤 Exportado: {round(exp, 1).values[0]} GWh<br>
+            📥 Importado: {round(imp, 1).values[0]} GWh<br>
+            ⚖️ Saldo: {round(saldo, 1).values[0]} GWh
             </div>
             """
-            popup = folium.Popup(popup_html, max_width=300)
-            if saldo < 0:
-                color = 'green'
-            else:
-                color = 'red'
-
-            folium.Marker(
-                location=[lat, lon],
-                popup=popup,
-                icon=folium.Icon(color=color, icon="bolt", prefix="fa")
-            ).add_to(spain_map)
-
+        popup = folium.Popup(popup_html, max_width=300)
+        if saldo.values[0] < 0:
+            color = 'green'
         else:
-            color = 'grey'
+            color = 'blue'
 
-        folium.Choropleth(
-            geo_data=geo_json_data,
-            data=messed_up_data,
-            columns=["State", "Unemployment"],
-            nan_fill_color="purple",
-            nan_fill_opacity=0.4,
-            key_on="feature.id",
-            fill_color="YlGn",
-        ).add_to(spain_map)
-                
-
-
-
-
-
-
-
-    # folium.GeoJson(
-    #     geo_json_data,
-    #     name="Intercambios Energéticos",
-    #     style_function=lambda feature: {
-    #         "fillColor": colormap(df_intercambio_total.loc[
-    #             df_intercambio_total["frontera"] == feature["properties"]["ADMIN"], "valor_(MWh)"
-    #         ].values[0]) if feature["properties"]["ADMIN"] in df_intercambio_total["frontera"].values else "gray",
-    #         "color": "black",
-    #         "weight": 1,
-    #         "fillOpacity": 0.7
-    #     },
-    #     tooltip=folium.GeoJsonTooltip(
-    #         fields=["ADMIN"], aliases=["País:"], sticky=False
-    #     )
-    # ).add_to(spain_map)
-
-    # colormap.add_to(spain_map)
-    # colormap.caption = "Saldo Energético (MWh)"
+        folium.Marker(
+            location=[lat, lon],
+            popup=popup,
+            icon=folium.Icon(color=color, icon="bolt", prefix="fa")
+            ).add_to(spain_map)
+        
+    folium.Choropleth(
+        geo_data=geo_json_data,
+        data=df_saldo[df_saldo['tipo'] == 'saldo'],
+        columns=["frontera", "valor_(MWh)"],
+        nan_fill_color="gray",
+        nan_fill_opacity=0.4,
+        key_on="feature.properties.ADMIN",
+        fill_color="GnBu",  # Escala de color de folium
+        fill_opacity=0.7,
+        line_opacity=0.2,
+    ).add_to(spain_map)
 
     st_folium(spain_map, width=800, height=600)
 
