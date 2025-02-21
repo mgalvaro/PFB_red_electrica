@@ -1,4 +1,5 @@
 import pandas as pd
+import uuid
 
 def limpia_columnas(dataframe) -> pd.DataFrame:
 
@@ -23,13 +24,12 @@ def limpia_columnas(dataframe) -> pd.DataFrame:
     
     dataframe = dataframe.rename(columns=columnas_renombradas)
    
-    dataframe["fecha"] = dataframe["fecha"].apply(lambda x: x[:10])
+    dataframe["fecha"] = dataframe["fecha"].apply(lambda x: x[:10].replace("-",""))
     dataframe["fecha_extraccion"] = dataframe["fecha_extraccion"].apply(lambda x: x[:10])
     dataframe["dia_semana"] = pd.to_datetime(dataframe["fecha"]).dt.dayofweek.map(dias_semana)
 
-    dataframe["ID"] = dataframe.reset_index()["index"].apply(
-        lambda x: str(dataframe["fecha_extraccion"].iloc[0][:10]).replace("-", "") + str(x)
-    ).astype("int64")
+    dataframe["ID"] = [uuid.uuid4().hex for _ in range(len(dataframe))]
+    dataframe["ID"] = dataframe["fecha"] + "-" + dataframe["ID"]
 
     dataframe["composite"] = dataframe["composite"].map({True: 1, False: 0})
     
