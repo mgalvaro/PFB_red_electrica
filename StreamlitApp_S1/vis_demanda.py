@@ -25,7 +25,7 @@ def vis_demanda():
 
     st.markdown("#### Demanda Eléctrica en España")
     with st.expander(label = "Dataset: Demanda", expanded = False):
-        df = pd.read_csv('../data/processed/DF_ DEMANDA_10_25_LIMPIO_V1.csv') 
+        df = pd.read_csv('../data/processed/DF_DEMANDA_10_25_LIMPIO_V1.csv') 
         df = df[df['titulo'] == 'Demanda']
         st.dataframe(df) 
 
