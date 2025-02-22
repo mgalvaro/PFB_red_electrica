@@ -9,7 +9,7 @@ import json
 
 from filtros_visualizaciones import *
 
-def vis_intercambios():
+def vis_intercambios(df):
 
     coord_paises = {
                     "frontera": ["Intercambios", "Portugal", "Francia", "Andorra", "Marruecos"],
@@ -26,11 +26,11 @@ def vis_intercambios():
                     "Histórico": -1 
                 }
     
-    st.markdown("#### Intercambios de Energía con otros Países")
-    with st.expander(label = "Dataset: Intercambios", expanded = False):
-        df = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
-        df = df[df['frontera'].isin(coord_paises['frontera'])]
-        st.dataframe(df)
+    st.markdown("#### :world_map: Intercambios de Energía con otros Países")
+    # with st.expander(label = "Dataset: Intercambios", expanded = False):
+    #     df = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')
+    #     df = df[df['frontera'].isin(coord_paises['frontera'])]
+    #     st.dataframe(df)
 
     periodo = st.radio(label = "Selecciona el período",
                        options = list(periodo_dict.keys()),

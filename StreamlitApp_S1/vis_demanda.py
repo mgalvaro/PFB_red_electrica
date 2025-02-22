@@ -10,10 +10,10 @@ from filtros_visualizaciones import *
 #_____________________
 
 
-def vis_demanda():
+def vis_demanda(df):
 
     # 1ª gráfica: Serie temporal de Demanda
-    st.write(os.getcwd())
+    # st.write(os.getcwd())
 
     periodos_dict = {
 
@@ -22,14 +22,6 @@ def vis_demanda():
         "Últimos 365 días": 365,
         "Histórico": -1 
     }
-
-    st.markdown("#### Demanda Eléctrica en España")
-    with st.expander(label = "Dataset: Demanda", expanded = False):
-        df = pd.read_csv('../data/processed/DF_DEMANDA_10_25_LIMPIO_V1.csv') 
-        df = df[df['titulo'] == 'Demanda']
-        st.dataframe(df) 
-
-    # aquí meter código para cuando estén definitivamente las funciones de extracción y de limpieza
 
     periodo = st.radio(label = "Selecciona el período",
                        options = list(periodos_dict.keys()),

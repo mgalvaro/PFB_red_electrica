@@ -15,23 +15,26 @@ from filtros_visualizaciones import *
 #_____________________
 
 
-def vis_compare():
+def vis_compare(df_demanda, df_generacion, df_intercambios):
 
     # 3ª gráfica: Comparación de dos años
 
-    df_demanda = pd.read_csv('../data/processed/DF_DEMANDA_10_25_LIMPIO_V1.csv')
-    df_generacion = pd.read_csv('../data/processed/DF_GENERACION_10_25_LIMPIO_V1.csv')
-    df_intercambios = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO_V1.csv')
-    df_balance = pd.read_csv('../data/processed/DF_BALANCE_10_25_LIMPIO_V1.csv')
+    # df_demanda = pd.read_csv('../data/processed/DF_DEMANDA_10_25_LIMPIO.csv')
+    # df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
+    # df_generacion = pd.read_csv('../data/processed/DF_GENERACION_10_25_LIMPIO.csv')
+    # df_intercambios = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')
+    # df_balance = pd.read_csv('../data/processed/DF_BALANCE_10_25_LIMPIO.csv')
 
     variables = {
 
         'Demanda': 1,
         'Balance': 2,
         'Generación': 3,
-        'Intercambios': 4
+        'Intercambio': 4
         
     }
+
+    st.markdown("### :calendar: Comparador por años")
 
     variable = st.radio(label='Seleccionar la variable a comparar',
                         options=variables.keys(),
@@ -39,8 +42,12 @@ def vis_compare():
                         disabled=False,
                         horizontal=True
                         )
+    
+    # with st.expander(label = "Dataset", expanded = False):
+    #     df_demanda = df_demanda[(df_demanda['titulo'] == 'Demanda') & (df_demanda['zona'] == 'nacional')]
+    #     st.dataframe(df_demanda) 
 
-    years = list(range(2010,2026))
+    years = list(df_demanda['año'].unique())
     years_to_compare = st.multiselect(label='Comparación por años',
                                       options=years,
                                       default=None,
@@ -57,57 +64,63 @@ def vis_compare():
         year1 = years_to_compare[0]
         year2 = years_to_compare[1]
 
-        color = 'año'
         ldash = None
 
         if variables[variable] == 1:
-            df = df_demanda[df_demanda['titulo'] == 'Demanda']
-            df = df[(df['año'] == year1) | (df['año'] == year2)]
-            df = df.groupby(['mes', 'año']).sum('valor_(MWh)').reset_index()
+            df = filtro_comparador((df_demanda[df_demanda['zona'] == 'nacional']), year1, year2)
 
         elif variables[variable] == 2:
-            df = df_balance
-            df = df[df['zona'] == 'nacional']
-            df = df[(df['año'] == year1) | (df['año'] == year2)]
-            df = df.groupby(['mes', 'año']).sum('valor_(MWh)').reset_index()
+            # df = filtro_comparador(df_balance[df_balance['zona'] == 'nacional'], year1, year2)
+            df1 = df_demanda
+            df2 = df_generacion
+            df = calculo_balance(df1, df2, year1, year2)  # saca una tupla de dos df
 
         elif variables[variable] == 3:
-            df = df_generacion
-            df = df[df['zona'] == 'nacional']
-            df = df[(df['año'] == year1) | (df['año'] == year2)]
-            df = df.groupby(['mes', 'año']).sum('valor_(MWh)').reset_index()
+            df = filtro_comparador(df_generacion[df_generacion['zona'] == 'nacional'], year1, year2)
 
         else:
-            df = df_intercambios#[df_intercambios['zona'].isin(['Francia', 'Portugal', 'Marruecos', 'Andorra'])].groupby(by=['fecha'])
-            df = filtro_intercambios(df, year1, year2)
-            color = 'tipo'
-            ldash='año'
+            df = filtro_intercambios(df_intercambios, year1, year2)
+            ldash='tipo'
 
-        df1 = df[df['año'] == year1]
-        df2 = df[df['año'] == year2]
-        df = pd.concat([df1, df2], ignore_index=True)
 
-        media = df['valor_(MWh)'].mean()
-        mediana = df['valor_(MWh)'].median()
-        maximo = df['valor_(MWh)'].max()
-        minimo = df['valor_(MWh)'].min()
+        fig = px.line(
+            data_frame=df[0],
+            x='fecha_sin_year',
+            y='valor_(GWh)',
+            color='año',
+            title=f"<b>{variable.title()}</b> nacional de energía a lo largo del año para {year1} y {year2}",
+            labels={'fecha_sin_year': 'Fecha', 'valor_(GWh)': 'Generación (GWh)', 'año': 'Año'},
+            line_dash=ldash,
+            color_discrete_sequence=["#32CD32", "#8B00FF"]
+            )
 
-        fig1 = px.line(data_frame=df,
-                       x='mes',
-                       y='valor_(MWh)',
-                       color=color,
-                       line_dash=ldash,
-                       title = f"{variable} en los años {year1} y {year2}",
-                       labels={'mes': "Mes", 'valor_(MWh)': f"{variable} (MWh)", 'zona': "Zona"}
-                       )
-        st.plotly_chart(fig1)
+        fig.update_xaxes(tickformat="%m-%b")
 
-        estadisticas = pd.DataFrame({
-                                    'Estadística': ['Media', 'Mediana', 'Máximo', 'Mínimo'],
-                                    'valor_': [media, mediana, maximo, minimo]
-                                })
+        st.plotly_chart(fig)
 
-        st.table(estadisticas)
+        st.table(df[1])
+
+        if variables[variable] != 4:
+            df_stats = df[1].melt(id_vars=['año'], var_name='Métrica', value_name='Valor')
+            fc = None
+        else:
+            df_stats = df[1].melt(id_vars=['año', 'tipo'], var_name='Métrica', value_name='Valor')
+            fc='tipo'
+
+        fig_stats = px.bar(df_stats,
+                           
+                            x='año', 
+                            y='Valor', 
+                            color='Métrica',
+                            facet_col=fc, 
+                            barmode='group', 
+                            title=f"Estadísticas de {variable} de energía por Año",
+                            labels={'Valor': 'GWh', 'año': 'Año', 'tipo': 'Tipo'},
+                            color_discrete_sequence=['#FF5733', '#33FF57', '#3357FF', '#FF33A1']
+
+                            )
+        
+        st.plotly_chart(fig_stats)
 
     
 
