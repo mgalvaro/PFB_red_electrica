@@ -2,7 +2,7 @@ import pandas as pd
 
 def balance_energetico_total(fecha_inicio, fecha_fin, zona) -> pd.DataFrame:
 
-    df_balance = pd.read_csv("../data/processed/DF_BALANCE_20_25_LIMPIO_V1.csv")
+    df_balance = pd.read_csv("../data/processed/DF_BALANCE_20_25_LIMPIO.csv")
 
     balance_total = df_balance[((df_balance["fecha"] >= fecha_inicio)&(df_balance["fecha"]<= fecha_fin))&(df_balance["zona"] == zona)].groupby("fecha").agg({"valor_(MWh)":"sum"})
     balance_total = balance_total.rename(columns={"valor_(MWh)":f"total_balance_{zona}_(MWh)"})
@@ -13,9 +13,9 @@ def demanda_energetica_total(fecha_inicio, fecha_fin, zona) -> pd.DataFrame:
 
     demanda_total = pd.DataFrame()
 
-    df_demanda = pd.read_csv("../data/processed/DF DEMANDA_20_25_LIMPIO_V1.csv")
-    df_generacion = pd.read_csv("../data/processed/DF GENERACION_20_25_LIMPIO_V1.csv")
-    df_intercambio = pd.read_csv("../data/processed/DF INTERCAMBIOS_20_25_LIMPIO_V1.csv")
+    df_demanda = pd.read_csv("../data/processed/DF DEMANDA_20_25_LIMPIO.csv")
+    df_generacion = pd.read_csv("../data/processed/DF GENERACION_20_25_LIMPIO.csv")
+    df_intercambio = pd.read_csv("../data/processed/DF INTERCAMBIOS_20_25_LIMPIO.csv")
 
     generacion = df_generacion[((df_generacion["fecha"] >= fecha_inicio)&(df_generacion["fecha"]<= fecha_fin))&(df_generacion["zona"] == "nacional")].groupby("fecha").agg({"valor_(MWh)":"sum"})
     generacion = generacion.rename(columns={"valor_(MWh)":f"total_generacion_{zona}_(MWh)"})
