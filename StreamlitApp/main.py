@@ -13,8 +13,8 @@ st.set_page_config(**PAGE_CONFIG)
 
 def init_connection():
     from supabase import create_client
-    url = st.secrets["SUPABASE_URL"]
-    key = st.secrets["SUPABASE_KEY"]
+    url = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
+    key = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
     return create_client(url, key)
 
 @st.cache_data
