@@ -71,7 +71,7 @@ def vis_intercambios(df):
     # with st.expander(label = "Dataset de Intercambios Filtrado", expanded = False):
     #     st.dataframe(df_saldo)
 
-    geo_json_path = "world_countries.json"
+    geo_json_path = "StreamlitApp/world_countries.json"
     with open(geo_json_path, "r", encoding="utf-8") as file:
         geo_json_data = json.load(file)
 
