@@ -64,7 +64,7 @@ def main():
 
     if choice == 'Inicio':
         st.markdown('### :zap: Bienvenido a la App de datos de la REE :zap:')
-        if not len(df_demanda) and len(df_generacion) and len(df_intercambios) and len(df_balance) > 0:
+        if len(df_demanda) and len(df_generacion) and len(df_intercambios) and len(df_balance) > 0:
             st.success(":heavy_check_mark: Datos cargados con éxito")
         else:
             st.error(":exclamation: Error al cargar los datos")
