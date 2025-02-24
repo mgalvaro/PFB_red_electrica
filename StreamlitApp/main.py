@@ -13,9 +13,9 @@ st.set_page_config(**PAGE_CONFIG)
 
 def main():
 
-    st.write("Directorio actual:", os.getcwd())
-    st.write("Archivos en el directorio actual:", os.listdir("."))
-    st.write("Archivos en '../data/processed':", os.listdir("../data/processed") if os.path.exists("../data/processed") else "No encontrado")
+    # st.write("Directorio actual:", os.getcwd())
+    # st.write("Archivos en el directorio actual:", os.listdir("."))
+    # st.write("Archivos en '../data/processed':", os.listdir("../data/processed") if os.path.exists("../data/processed") else "No encontrado")
     
     df_demanda = pd.read_csv('data/processed/DF_DEMANDA_10_25_LIMPIO.csv')
     df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
