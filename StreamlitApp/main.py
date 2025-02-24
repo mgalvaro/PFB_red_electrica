@@ -52,6 +52,11 @@ def main():
 
     df_demanda, df_generacion, df_intercambios, df_balance = run_query()
 
+    df_demanda = pd.DataFrame(df_demanda)
+    df_generacion = pd.DataFrame(df_generacion)
+    df_intercambios = pd.DataFrame(df_intercambios)
+    df_balance = pd.DataFrame(df_balance)
+
     st.write(len(df_demanda))
     st.write(len(df_generacion))
     st.write(len(df_intercambios))
