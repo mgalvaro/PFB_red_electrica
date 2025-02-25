@@ -71,7 +71,7 @@ def run_query() -> tuple:
 
         ultimas_extracciones[tabla] = get_ultima_extraccion(tabla)
 
-    st.write(f"Ultimas fechas: {ultimas_extracciones}")
+    st.write(f"Ultimas fechas de extracción: {ultimas_extracciones}")
 
     fechas_faltantes = {}
 
@@ -84,18 +84,15 @@ def run_query() -> tuple:
 
     for tabla, ultima_extraccion in ultimas_extracciones.items():
         dias_faltantes = []
-        st.write(f"tabla: {tabla}, ultima extraccion: {ultima_extraccion}")
         
         ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
-        st.write(f"ultima extraccion: {ultima_extraccion}")
+
         while ultima_extraccion < hoy:
             ultima_extraccion += pd.Timedelta(days=1)
             if ultima_extraccion <= hoy:
                 dias_faltantes.append(ultima_extraccion.strftime('%Y-%m-%d'))
             
         fechas_faltantes[tabla] = dias_faltantes
-        
-    st.write(f"fechas faltantes: {fechas_faltantes}")
             
     return df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes
 
@@ -103,21 +100,18 @@ def agregar_datos_supabase(tabla, datos) -> dict:
 
     supabase = init_connection()
 
-    #datos = datos.copy()
-    #for col in datos.select_dtypes(include=["datetime", "datetime64[ns]"]).columns:
-    #    datos[col] = datos[col].dt.strftime('%Y-%m-%d')  # Convierte a string en formato 'YYYY-MM-DD'
-
-    registros = datos.astype(str).to_dict(orient="records")  # Convierte el DataFrame a una lista de diccionarios
+    registros = datos.astype(str).to_dict(orient="records")  
     
     try:
         response = supabase.table(tabla).insert(registros).execute()
-        if response.status_code == 201:
-            st.success(f"Datos agregados correctamente a la tabla '{tabla}'.")
+    
+        if "error" in response.data or response.data is None:
+            st.error(f"Error al agregar datos a '{tabla}': {response.data}")
         else:
-            st.error(f"Error al agregar datos a '{tabla}': {response.status_code} - {response.json()}")
-        return response
+            st.success(f"Datos agregados correctamente a la tabla '{tabla}'.")
+            return response
     except Exception as e:
-        st.write(registros)
+        st.write(registros)  # Mostrar los datos en caso de error
         st.error(f"Error al agregar datos a '{tabla}': {str(e)}")
         return None
 
@@ -128,7 +122,6 @@ def main():
 
     df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes = run_query()
 
-    st.write(f"{fechas_faltantes}")
     # Proceso de extracción y actualización de datos
     if fechas_faltantes:
         st.write("Procesando fechas faltantes...")
