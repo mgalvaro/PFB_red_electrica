@@ -80,7 +80,7 @@ def run_query() -> tuple:
     }
 
     for tabla, ultima_extraccion in ultimas_extracciones.items():
-        st.write(f"tabla: {tabla}, ultima fecha: {ultima_extraccion}")
+        st.write(f"tabla: {tabla}, ultima extraccion: {ultima_extraccion}")
         #if ultima_extraccion:
             #ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
             #st.write(f"ultima fecha csv{ultima_fecha_csv}")
@@ -91,6 +91,8 @@ def run_query() -> tuple:
         st.write(f"ultima extraccion: {ultima_extraccion}")
         if pd.to_datetime(ultima_extraccion) < hoy:
             fechas_faltantes[tabla] = ultima_extraccion + pd.Timedelta(days=1)
+        
+    st.write(f"fechas faltantes: {fechas_faltantes}")
             
     return df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes
 
@@ -110,7 +112,7 @@ def agregar_datos_supabase(tabla, datos) -> dict:
         st.error(f"Error al agregar datos a '{tabla}': {str(e)}")
         return None
 
-def main():
+'''def main():
 
     hoy = datetime.now().strftime("%Y-%m-%d")
 
@@ -195,4 +197,4 @@ def main():
         pass
 
 if __name__ == '__main__':
-    main()
+    main()'''
