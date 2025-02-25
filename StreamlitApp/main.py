@@ -82,16 +82,6 @@ def run_query() -> tuple:
     for tabla, ultima_extraccion in ultimas_extracciones.items():
         dias_faltantes = []
         st.write(f"tabla: {tabla}, ultima extraccion: {ultima_extraccion}")
-        #if ultima_extraccion:
-            #ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
-            #st.write(f"ultima fecha csv{ultima_fecha_csv}")
-            #if pd.to_datetime(ultima_extraccion) > ultima_fecha_csv:
-                #fechas_faltantes[tabla] = ultima_fecha_csv + pd.Timedelta(days=1)
-
-        #ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
-        #st.write(f"ultima extraccion: {ultima_extraccion}")
-        #if pd.to_datetime(ultima_extraccion) < hoy:
-        #    fechas_faltantes[tabla] = ultima_extraccion + pd.Timedelta(days=1)
         
         ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
         st.write(f"ultima extraccion: {ultima_extraccion}")
@@ -100,8 +90,6 @@ def run_query() -> tuple:
             if ultima_extraccion <= hoy:
                 dias_faltantes.append(ultima_extraccion)
             
-    
-        # Guardar las fechas faltantes en el diccionario con la tabla como clave
         fechas_faltantes[tabla] = dias_faltantes
         
     st.write(f"fechas faltantes: {fechas_faltantes}")
@@ -132,15 +120,16 @@ def main():
     df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes = run_query()
 
     st.write(f"{fechas_faltantes}")
-    '''# Proceso de extracción y actualización de datos
+    # Proceso de extracción y actualización de datos
     if fechas_faltantes:
         st.write("Procesando fechas faltantes...")
 
         for tabla, fecha in fechas_faltantes.items():
-            st.write(f"Extrayendo datos para la tabla '{tabla}' desde la fecha: {fecha}")
+
+            st.write(f"Extrayendo datos para la tabla '{tabla}' desde la fecha: {fecha[0]}")
 
             if tabla == "demanda":
-                nuevos_datos_demanda = extrae_demanda(fecha, hoy)
+                nuevos_datos_demanda = extrae_demanda(fecha[0], hoy)
                 nuevos_datos_demanda = limpia_demanda(nuevos_datos_demanda)
 
                 if len(nuevos_datos_demanda) > 0:
@@ -149,8 +138,9 @@ def main():
                     df_demanda = pd.concat([df_demanda, nuevos_datos_demanda]).drop_duplicates()
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+
             elif tabla == "generacion":
-                nuevos_datos_generacion = extrae_generacion(fecha, hoy)
+                nuevos_datos_generacion = extrae_generacion(fecha[0], hoy)
                 nuevos_datos_generacion = limpia_generacion(nuevos_datos_generacion)
 
                 if len(nuevos_datos_generacion) > 0:
@@ -159,8 +149,9 @@ def main():
                     df_generacion = pd.concat([df_generacion, nuevos_datos_generacion]).drop_duplicates()
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+
             elif tabla == "intercambios":
-                nuevos_datos_intercambios = extrae_intercambios(fecha, hoy)
+                nuevos_datos_intercambios = extrae_intercambios(fecha[0], hoy)
                 nuevos_datos_intercambios = limpia_intercambio(nuevos_datos_intercambios)
 
                 if len(nuevos_datos_intercambios) > 0:
@@ -169,8 +160,9 @@ def main():
                     df_intercambios = pd.concat([df_intercambios, nuevos_datos_intercambios]).drop_duplicates()
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+                    
             elif tabla == "balance":
-                nuevos_datos_balance = extrae_balance(fecha, hoy)
+                nuevos_datos_balance = extrae_balance(fecha[0], hoy)
                 nuevos_datos_balance = limpia_balance(nuevos_datos_balance)
 
                 if len(nuevos_datos_balance) > 0:
@@ -208,7 +200,7 @@ def main():
         vis_generacion(df_generacion)
     
     else:
-        pass'''
+        pass
 
 if __name__ == '__main__':
     main()
