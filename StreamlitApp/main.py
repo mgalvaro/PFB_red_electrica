@@ -34,17 +34,18 @@ def init_connection() -> tuple:
     return create_client(url, key)
 
 # Obtener la última fecha
-def get_latest_fecha(tabla) -> str:
+def get_ultima_extraccion(tabla) -> str:
+
     supabase = init_connection()
     response = (
         supabase.table(tabla)
-        .select("fecha")  
-        .order("fecha", desc=True)  
+        .select("fecha_extraccion")  
+        .order("fecha_extraccion", desc=True)  
         .limit(1)  
         .execute()
     )
     if response.data:
-        return response.data[0]["fecha"]  # Devuelve la fecha más reciente
+        return response.data[0]["fecha_extraccion"]  # Devuelve la fecha más reciente
     else:
         return None 
 
@@ -57,15 +58,17 @@ def run_query() -> tuple:
     df_intercambios = pd.read_csv('data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')
     df_balance = pd.read_csv('data/processed/DF_BALANCE_10_25_LIMPIO.csv')
 
-    ultimas_fechas = {}
+    hoy = datetime.now().strftime("%Y-%m-%d")
+
+    ultimas_extracciones = {}
     #supabase = init_connection()
     tablas = ["demanda", "generacion", "intercambios", "balance"]
     
     for tabla in tablas:
 
-        ultimas_fechas[tabla] = get_latest_fecha(tabla)
+        ultimas_extracciones[tabla] = get_ultima_extraccion(tabla)
 
-    st.write(f"Ultimas fechas: {ultimas_fechas}")
+    st.write(f"Ultimas fechas: {ultimas_extracciones}")
 
     fechas_faltantes = {}
 
@@ -76,14 +79,19 @@ def run_query() -> tuple:
         "balance": df_balance,
     }
 
-    for tabla, ultima_fecha in ultimas_fechas.items():
-        st.write(f"tabla: {tabla}, ultima fecha: {ultima_fecha}")
-        if ultima_fecha:
-            ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha"]).max()
-            st.write(f"ultima fecha csv{ultima_fecha_csv}")
-            if pd.to_datetime(ultima_fecha) > ultima_fecha_csv:
-                fechas_faltantes[tabla] = ultima_fecha_csv + pd.Timedelta(days=1)
+    for tabla, ultima_extraccion in ultimas_extracciones.items():
+        st.write(f"tabla: {tabla}, ultima fecha: {ultima_extraccion}")
+        #if ultima_extraccion:
+            #ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
+            #st.write(f"ultima fecha csv{ultima_fecha_csv}")
+            #if pd.to_datetime(ultima_extraccion) > ultima_fecha_csv:
+                #fechas_faltantes[tabla] = ultima_fecha_csv + pd.Timedelta(days=1)
 
+        ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
+        st.write(f"ultima extraccion: {ultima_extraccion}")
+        if pd.to_datetime(ultima_extraccion) < hoy:
+            fechas_faltantes[tabla] = ultima_extraccion + pd.Timedelta(days=1)
+            
     return df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes
 
 def agregar_datos_supabase(tabla, datos) -> dict:
@@ -104,9 +112,7 @@ def agregar_datos_supabase(tabla, datos) -> dict:
 
 def main():
 
-    hoy = datetime.now().strftime("%Y-%m-%D")
-
-    #supabase = init_connection()
+    hoy = datetime.now().strftime("%Y-%m-%d")
 
     df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes = run_query()
 
