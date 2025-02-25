@@ -128,67 +128,65 @@ def main():
 
         for tabla, fechas in fechas_faltantes.items():
 
-            for fecha in fechas:
+            st.write(f"Extrayendo datos para la tabla '{tabla}' desde la fecha: {fechas[0]}")
 
-                st.write(f"Extrayendo datos para la tabla '{tabla}' desde la fecha: {fecha}")
+            if tabla == "demanda":
+                nuevos_datos_demanda = extrae_demanda(fechas[0], hoy)
+                nuevos_datos_demanda = divide_fecha(nuevos_datos_demanda)
+                nuevos_datos_demanda = limpia_columnas(nuevos_datos_demanda)
+                nuevos_datos_demanda = limpia_demanda(nuevos_datos_demanda)
 
-                if tabla == "demanda":
-                    nuevos_datos_demanda = extrae_demanda(fecha, hoy)
-                    nuevos_datos_demanda = divide_fecha(nuevos_datos_demanda)
-                    nuevos_datos_demanda = limpia_columnas(nuevos_datos_demanda)
-                    nuevos_datos_demanda = limpia_demanda(nuevos_datos_demanda)
+                if len(nuevos_datos_demanda) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_demanda)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_demanda)
+                    df_demanda = pd.concat([df_demanda, nuevos_datos_demanda]).drop_duplicates(subset="ID")
+                    df_demanda.to_csv("data/processed/DF_DEMANDA_10_25_LIMPIO.csv", index=False, sep=",")
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
 
-                    if len(nuevos_datos_demanda) > 0:
-                        st.write(f"Agregando {len(nuevos_datos_demanda)} registros a la tabla '{tabla}'...")
-                        agregar_datos_supabase(tabla, nuevos_datos_demanda)
-                        df_demanda = pd.concat([df_demanda, nuevos_datos_demanda]).drop_duplicates(subset="ID")
-                        df_demanda.to_csv("data/processed/DF_DEMANDA_10_25_LIMPIO.csv", index=False, sep=",")
-                    else:
-                        st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+            elif tabla == "generacion":
+                nuevos_datos_generacion = extrae_generacion(fechas[0], hoy)
+                nuevos_datos_generacion = divide_fecha(nuevos_datos_generacion)
+                nuevos_datos_generacion = limpia_columnas(nuevos_datos_generacion)
+                nuevos_datos_generacion = limpia_generacion(nuevos_datos_generacion)
 
-                elif tabla == "generacion":
-                    nuevos_datos_generacion = extrae_generacion(fecha, hoy)
-                    nuevos_datos_generacion = divide_fecha(nuevos_datos_generacion)
-                    nuevos_datos_generacion = limpia_columnas(nuevos_datos_generacion)
-                    nuevos_datos_generacion = limpia_generacion(nuevos_datos_generacion)
+                if len(nuevos_datos_generacion) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_generacion)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_generacion)
+                    df_generacion = pd.concat([df_generacion, nuevos_datos_generacion]).drop_duplicates(subset="ID")
+                    df_generacion.to_csv("data/processed/DF_GENERACION_10_25_LIMPIO.csv", index=False, sep=",")
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
 
-                    if len(nuevos_datos_generacion) > 0:
-                        st.write(f"Agregando {len(nuevos_datos_generacion)} registros a la tabla '{tabla}'...")
-                        agregar_datos_supabase(tabla, nuevos_datos_generacion)
-                        df_generacion = pd.concat([df_generacion, nuevos_datos_generacion]).drop_duplicates(subset="ID")
-                        df_generacion.to_csv("data/processed/DF_GENERACION_10_25_LIMPIO.csv", index=False, sep=",")
-                    else:
-                        st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+            elif tabla == "intercambios":
+                nuevos_datos_intercambios = extrae_intercambios(fechas[0], hoy)
+                nuevos_datos_intercambios = divide_fecha(nuevos_datos_intercambios)
+                nuevos_datos_intercambios = limpia_columnas(nuevos_datos_intercambios)
+                nuevos_datos_intercambios = limpia_intercambio(nuevos_datos_intercambios)
 
-                elif tabla == "intercambios":
-                    nuevos_datos_intercambios = extrae_intercambios(fecha, hoy)
-                    nuevos_datos_intercambios = divide_fecha(nuevos_datos_intercambios)
-                    nuevos_datos_intercambios = limpia_columnas(nuevos_datos_intercambios)
-                    nuevos_datos_intercambios = limpia_intercambio(nuevos_datos_intercambios)
+                if len(nuevos_datos_intercambios) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_intercambios)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_intercambios)
+                    df_intercambios = pd.concat([df_intercambios, nuevos_datos_intercambios]).drop_duplicates(subset="ID")
+                    df_intercambios.to_csv("data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv", index=False, sep=",")
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
 
-                    if len(nuevos_datos_intercambios) > 0:
-                        st.write(f"Agregando {len(nuevos_datos_intercambios)} registros a la tabla '{tabla}'...")
-                        agregar_datos_supabase(tabla, nuevos_datos_intercambios)
-                        df_intercambios = pd.concat([df_intercambios, nuevos_datos_intercambios]).drop_duplicates(subset="ID")
-                        df_intercambios.to_csv("data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv", index=False, sep=",")
-                    else:
-                        st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+            elif tabla == "balance":
+                nuevos_datos_balance = extrae_balance(fechas[0], hoy)
+                nuevos_datos_balance = divide_fecha(nuevos_datos_balance)
+                nuevos_datos_balance = limpia_columnas(nuevos_datos_balance)
+                nuevos_datos_balance = limpia_balance(nuevos_datos_balance)
 
-                elif tabla == "balance":
-                    nuevos_datos_balance = extrae_balance(fecha, hoy)
-                    nuevos_datos_balance = divide_fecha(nuevos_datos_balance)
-                    nuevos_datos_balance = limpia_columnas(nuevos_datos_balance)
-                    nuevos_datos_balance = limpia_balance(nuevos_datos_balance)
-
-                    if len(nuevos_datos_balance) > 0:
-                        st.write(f"Agregando {len(nuevos_datos_balance)} registros a la tabla '{tabla}'...")
-                        agregar_datos_supabase(tabla, nuevos_datos_balance)
-                        df_balance = pd.concat([nuevos_datos_balance, df_balance]).drop_duplicates(subset="ID")
-                        df_balance.to_csv("data/processed/DF_BALANCE_10_25_LIMPIO.csv", index=False, sep=",")
-                    else:
-                        st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
-        else:
-            st.write("No hay datos faltantes para procesar.")
+                if len(nuevos_datos_balance) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_balance)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_balance)
+                    df_balance = pd.concat([nuevos_datos_balance, df_balance]).drop_duplicates(subset="ID")
+                    df_balance.to_csv("data/processed/DF_BALANCE_10_25_LIMPIO.csv", index=False, sep=",")
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+    else:
+        st.write("No hay datos faltantes para procesar.")
     
     df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
 
