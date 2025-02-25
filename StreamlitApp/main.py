@@ -80,6 +80,7 @@ def run_query() -> tuple:
     }
 
     for tabla, ultima_extraccion in ultimas_extracciones.items():
+        dias_faltantes = []
         st.write(f"tabla: {tabla}, ultima extraccion: {ultima_extraccion}")
         #if ultima_extraccion:
             #ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
@@ -87,10 +88,19 @@ def run_query() -> tuple:
             #if pd.to_datetime(ultima_extraccion) > ultima_fecha_csv:
                 #fechas_faltantes[tabla] = ultima_fecha_csv + pd.Timedelta(days=1)
 
+        #ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
+        #st.write(f"ultima extraccion: {ultima_extraccion}")
+        #if pd.to_datetime(ultima_extraccion) < hoy:
+        #    fechas_faltantes[tabla] = ultima_extraccion + pd.Timedelta(days=1)
+        
         ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
         st.write(f"ultima extraccion: {ultima_extraccion}")
-        if pd.to_datetime(ultima_extraccion) < hoy:
-            fechas_faltantes[tabla] = ultima_extraccion + pd.Timedelta(days=1)
+        while ultima_extraccion < hoy:
+            ultima_extraccion += pd.Timedelta(days=1)
+            dias_faltantes.append(ultima_extraccion)
+    
+        # Guardar las fechas faltantes en el diccionario con la tabla como clave
+        fechas_faltantes[tabla] = dias_faltantes
         
     st.write(f"fechas faltantes: {fechas_faltantes}")
             
