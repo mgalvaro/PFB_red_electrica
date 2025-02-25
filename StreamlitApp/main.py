@@ -1,14 +1,12 @@
-# PRUEBAS PARA BBDD7 25/02/25 12:00
-
 from datetime import datetime
 import streamlit as st
 import pandas as pd
 import os
 
-from src.funciones.extraccion_balance import *
-from src.funciones.extraccion_demanda import *
-from src.funciones.extraccion_generacion import *
-from src.funciones.extraccion_intercambios import *
+from extraccion_balance import *
+from extraccion_demanda import *
+from extraccion_generacion import *
+from extraccion_intercambios import *
 
 from config import PAGE_CONFIG
 
