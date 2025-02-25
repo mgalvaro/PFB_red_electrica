@@ -1,8 +1,18 @@
+# PRUEBAS PARA BBDD7 25/02/25 12:00
+
+from datetime import datetime
 import streamlit as st
 import pandas as pd
 import os
 
+from src.funciones.extraccion_balance import *
+from src.funciones.extraccion_demanda import *
+from src.funciones.extraccion_generacion import *
+from src.funciones.extraccion_intercambios import *
+
 from config import PAGE_CONFIG
+
+from supabase import create_client
 
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
@@ -11,21 +21,81 @@ from vis_generacion import vis_generacion
 
 st.set_page_config(**PAGE_CONFIG)
 
-def init_connection():
-    from supabase import create_client
+def init_connection() -> tuple:
     url = st.secrets["connections"]["supabase"]["SUPABASE_URL"]
     key = st.secrets["connections"]["supabase"]["SUPABASE_KEY"]
     return create_client(url, key)
 
-@st.cache_data
-def run_query():
+# Obtener la última fecha
+def get_latest_fecha(tabla) -> str:
     supabase = init_connection()
+    response = (
+        supabase.table(tabla)
+        .select("fecha")  
+        .order("fecha", desc=True)  
+        .limit(1)  
+        .execute()
+    )
+    if response.data:
+        return response.data[0]["fecha"]  # Devuelve la fecha más reciente
+    else:
+        return None 
+
+@st.cache_data
+def run_query() -> tuple:
+
+    df_demanda = pd.read_csv('data/processed/DF_DEMANDA_10_25_LIMPIO.csv')
+    #df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
+    df_generacion = pd.read_csv('data/processed/DF_GENERACION_10_25_LIMPIO.csv')
+    df_intercambios = pd.read_csv('data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')
+    df_balance = pd.read_csv('data/processed/DF_BALANCE_10_25_LIMPIO.csv')
+
+    ultimas_fechas = {}
+    #supabase = init_connection()
+    tablas = ["demanda", "generacion", "intercambios", "balance"]
     
-    # Ejecuta las consultas
-    demanda = supabase.table("demanda").select("*").eq("titulo", "Demanda").execute()
-    generacion = supabase.table("generacion").select("*").execute()
-    intercambios = supabase.table("intercambios").select("*").execute()
-    balance = supabase.table("balance").select("*").execute()
+    for tabla in tablas:
+
+        ultimas_fechas[tabla] = get_latest_fecha(tabla)
+
+    fechas_faltantes = {}
+
+    df_dict = {
+        "demanda": df_demanda,
+        "generacion": df_generacion,
+        "intercambios": df_intercambios,
+        "balance": df_balance,
+    }
+
+    for tabla, ultima_fecha in ultimas_fechas.items():
+        if ultima_fecha:
+            ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha"]).max()
+            if pd.to_datetime(ultima_fecha) > ultima_fecha_csv:
+                fechas_faltantes[tabla] = ultima_fecha_csv + pd.Timedelta(days=1)
+
+    return df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes
+
+def agregar_datos_supabase(tabla, datos) -> dict:
+
+    supabase = init_connection()
+    registros = datos.to_dict(orient="records")  # Convierte el DataFrame a una lista de diccionarios
+    
+    try:
+        response = supabase.table(tabla).insert(registros).execute()
+        if response.status_code == 201:
+            st.success(f"Datos agregados correctamente a la tabla '{tabla}'.")
+        else:
+            st.error(f"Error al agregar datos a '{tabla}': {response.status_code} - {response.json()}")
+        return response
+    except Exception as e:
+        st.error(f"Error al agregar datos a '{tabla}': {str(e)}")
+        return None
+
+    ''' # Ejecuta las consultas
+    actualiza_demanda = supabase.table("demanda").select("*").eq("titulo", "Demanda").execute()
+    actualiza_generacion = supabase.table("generacion").select("*").execute()
+    actualiza_intercambios = supabase.table("intercambios").select("*").execute()
+    actualiza_balance = supabase.table("balance").select("*").execute()
     
     # Accede a los datos en el atributo `.data`
     demanda_data = demanda.data if demanda and demanda.data else None
@@ -36,32 +106,60 @@ def run_query():
     if demanda_data and generacion_data and intercambios_data and balance_data:
         return demanda_data, generacion_data, intercambios_data, balance_data
     else:
-        return None, None, None, None
+        return None, None, None, None'''
 
 
 def main():
 
-    # st.write("Directorio actual:", os.getcwd())
-    # st.write("Archivos en el directorio actual:", os.listdir("."))
-    # st.write("Archivos en '../data/processed':", os.listdir("../data/processed") if os.path.exists("../data/processed") else "No encontrado")
+    hoy = datetime.now().strftime("%Y-%m-%D")
+
+    #supabase = init_connection()
+
+    df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes = run_query()
+
+    # Proceso de extracción y actualización de datos
+    if fechas_faltantes:
+        st.write("Procesando fechas faltantes...")
+
+        for tabla, fecha in fechas_faltantes.items():
+            st.write(f"Extrayendo datos para la tabla '{tabla}' desde la fecha: {fecha}")
+
+            if tabla == "demanda":
+                nuevos_datos_demanda = extrae_demanda(fecha, hoy)
+                if len(nuevos_datos_demanda) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_demanda)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_demanda)
+                    df_demanda = pd.concat([df_demanda, nuevos_datos_demanda]).drop_duplicates()
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+            elif tabla == "generacion":
+                nuevos_datos_generacion = extrae_generacion(fecha, hoy)
+                if len(nuevos_datos_generacion) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_generacion)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_generacion)
+                    df_generacion = pd.concat([df_generacion, nuevos_datos_generacion]).drop_duplicates()
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+            elif tabla == "intercambios":
+                nuevos_datos_intercambios = extrae_intercambios(fecha, hoy)
+                if len(nuevos_datos_intercambios) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_intercambios)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_intercambios)
+                    df_intercambios = pd.concat([df_intercambios, nuevos_datos_intercambios]).drop_duplicates()
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+            elif tabla == "balance":
+                nuevos_datos_balance = extrae_balance(fecha, hoy)
+                if len(nuevos_datos_balance) > 0:
+                    st.write(f"Agregando {len(nuevos_datos_balance)} registros a la tabla '{tabla}'...")
+                    agregar_datos_supabase(tabla, nuevos_datos_balance)
+                    df_balance = pd.concat([nuevos_datos_balance, df_balance]).drop_duplicates()
+                else:
+                    st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
+    else:
+        st.write("No hay datos faltantes para procesar.")
     
-    '''df_demanda = pd.read_csv('data/processed/DF_DEMANDA_10_25_LIMPIO.csv')
     df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
-    df_generacion = pd.read_csv('data/processed/DF_GENERACION_10_25_LIMPIO.csv')
-    df_intercambios = pd.read_csv('data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')'''
-
-    df_demanda, df_generacion, df_intercambios, df_balance = run_query()
-
-    df_demanda = pd.DataFrame(df_demanda)
-    df_generacion = pd.DataFrame(df_generacion)
-    df_intercambios = pd.DataFrame(df_intercambios)
-    df_balance = pd.DataFrame(df_balance)
-
-    st.write(len(df_demanda))
-    st.write(len(df_generacion))
-    st.write(len(df_intercambios))
-    st.write(len(df_balance))
-
 
     menu = ['Inicio', 'Serie Temporal Demanda', 'Mapa de Intercambios', 'Comparación Anual', 'Generación por tecnología']
 
