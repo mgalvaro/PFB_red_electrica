@@ -7,10 +7,10 @@ from config import PAGE_CONFIG
 
 from supabase import create_client
 
-from extraccion_balance_st import extrae_balance_st
-from extraccion_demanda_st import extrae_demanda_st
-from extraccion_generacion_st import extrae_generacion_st
-from extraccion_intercambios_st import extrae_intercambios_st
+from functions.extraccion_balance_st import extrae_balance_st
+from functions.extraccion_demanda_st import extrae_demanda_st
+from functions.extraccion_generacion_st import extrae_generacion_st
+from functions.extraccion_intercambios_st import extrae_intercambios_st
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
 from vis_compare_years import vis_compare
