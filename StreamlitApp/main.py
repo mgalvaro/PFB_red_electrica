@@ -77,6 +77,7 @@ def run_query() -> tuple:
     }
 
     for tabla, ultima_fecha in ultimas_fechas.items():
+        st.write(f"tabla: {tabla}, ultima fecha: {ultima_fecha}")
         if ultima_fecha:
             ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha"]).max()
             if pd.to_datetime(ultima_fecha) > ultima_fecha_csv:
