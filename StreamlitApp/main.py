@@ -80,6 +80,7 @@ def run_query() -> tuple:
         st.write(f"tabla: {tabla}, ultima fecha: {ultima_fecha}")
         if ultima_fecha:
             ultima_fecha_csv = pd.to_datetime(df_dict[tabla]["fecha"]).max()
+            st.write(f"ultima fecha csv{ultima_fecha_csv}")
             if pd.to_datetime(ultima_fecha) > ultima_fecha_csv:
                 fechas_faltantes[tabla] = ultima_fecha_csv + pd.Timedelta(days=1)
 
