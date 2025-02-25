@@ -112,9 +112,10 @@ def agregar_datos_supabase(tabla, datos) -> dict:
         st.error(f"Error al agregar datos a '{tabla}': {str(e)}")
         return None
 
-'''def main():
+def main():
 
-    hoy = datetime.now().strftime("%Y-%m-%d")
+    st.write("main")
+'''    hoy = datetime.now().strftime("%Y-%m-%d")
 
     df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes = run_query()
 
@@ -194,7 +195,7 @@ def agregar_datos_supabase(tabla, datos) -> dict:
         vis_generacion(df_generacion)
     
     else:
-        pass
+        pass'''
 
 if __name__ == '__main__':
-    main()'''
+    main()
