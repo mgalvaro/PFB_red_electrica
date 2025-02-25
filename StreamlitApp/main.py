@@ -7,10 +7,10 @@ from config import PAGE_CONFIG
 
 from supabase import create_client
 
-from extraccion_balance import extrae_balance
-from extraccion_demanda import extrae_demanda
-from extraccion_generacion import extrae_generacion
-from extraccion_intercambios import extrae_intercambios
+from extraccion_balance_st import extrae_balance_st
+from extraccion_demanda_st import extrae_demanda_st
+from extraccion_generacion_st import extrae_generacion_st
+from extraccion_intercambios_st import extrae_intercambios_st
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
 from vis_compare_years import vis_compare
@@ -122,7 +122,7 @@ def main():
             st.write(f"Extrayendo datos para la tabla '{tabla}' desde la fecha: {fecha}")
 
             if tabla == "demanda":
-                nuevos_datos_demanda = extrae_demanda(fecha, hoy)
+                nuevos_datos_demanda = extrae_demanda_st(fecha, hoy)
                 if len(nuevos_datos_demanda) > 0:
                     st.write(f"Agregando {len(nuevos_datos_demanda)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_demanda)
@@ -130,7 +130,7 @@ def main():
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
             elif tabla == "generacion":
-                nuevos_datos_generacion = extrae_generacion(fecha, hoy)
+                nuevos_datos_generacion = extrae_generacion_st(fecha, hoy)
                 if len(nuevos_datos_generacion) > 0:
                     st.write(f"Agregando {len(nuevos_datos_generacion)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_generacion)
@@ -138,7 +138,7 @@ def main():
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
             elif tabla == "intercambios":
-                nuevos_datos_intercambios = extrae_intercambios(fecha, hoy)
+                nuevos_datos_intercambios = extrae_intercambios_st(fecha, hoy)
                 if len(nuevos_datos_intercambios) > 0:
                     st.write(f"Agregando {len(nuevos_datos_intercambios)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_intercambios)
@@ -146,7 +146,7 @@ def main():
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
             elif tabla == "balance":
-                nuevos_datos_balance = extrae_balance(fecha, hoy)
+                nuevos_datos_balance = extrae_balance_st(fecha, hoy)
                 if len(nuevos_datos_balance) > 0:
                     st.write(f"Agregando {len(nuevos_datos_balance)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_balance)
