@@ -140,6 +140,7 @@ def main():
                     st.write(f"Agregando {len(nuevos_datos_demanda)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_demanda)
                     df_demanda = pd.concat([df_demanda, nuevos_datos_demanda]).drop_duplicates()
+                    df_demanda.to_csv("../data/processed/DF_DEMANDA_10_25_LIMPIO.csv", index=False, sep=",")
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
 
@@ -153,6 +154,7 @@ def main():
                     st.write(f"Agregando {len(nuevos_datos_generacion)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_generacion)
                     df_generacion = pd.concat([df_generacion, nuevos_datos_generacion]).drop_duplicates()
+                    df_generacion.to_csv("../data/processed/DF_GENERACION_10_25_LIMPIO.csv", index=False, sep=",")
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
 
@@ -166,6 +168,7 @@ def main():
                     st.write(f"Agregando {len(nuevos_datos_intercambios)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_intercambios)
                     df_intercambios = pd.concat([df_intercambios, nuevos_datos_intercambios]).drop_duplicates()
+                    df_intercambios.to_csv("../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv", index=False, sep=",")
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
 
@@ -179,6 +182,7 @@ def main():
                     st.write(f"Agregando {len(nuevos_datos_balance)} registros a la tabla '{tabla}'...")
                     agregar_datos_supabase(tabla, nuevos_datos_balance)
                     df_balance = pd.concat([nuevos_datos_balance, df_balance]).drop_duplicates()
+                    df_balance.to_csv("../data/processed/DF_BALANCE_10_25_LIMPIO.csv", index=False, sep=",")
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
     else:
