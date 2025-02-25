@@ -91,7 +91,7 @@ def run_query() -> tuple:
         while ultima_extraccion < hoy:
             ultima_extraccion += pd.Timedelta(days=1)
             if ultima_extraccion <= hoy:
-                dias_faltantes.append(ultima_extraccion)
+                dias_faltantes.append(ultima_extraccion.strftime('%Y-%m-%d'))
             
         fechas_faltantes[tabla] = dias_faltantes
         
