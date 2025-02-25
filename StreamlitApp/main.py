@@ -95,7 +95,7 @@ def run_query() -> tuple:
         
         ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
         st.write(f"ultima extraccion: {ultima_extraccion}")
-        while ultima_extraccion < hoy:
+        while ultima_extraccion < hoy.hour:
             ultima_extraccion += pd.Timedelta(days=1)
             dias_faltantes.append(ultima_extraccion)
     
