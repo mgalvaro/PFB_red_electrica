@@ -11,15 +11,15 @@ sys.path.append(BASE_DIR)
 
 from supabase import create_client
 
-from funciones.extraccion_balance import extrae_balance
-from funciones.extraccion_demanda import extrae_demanda
-from funciones.extraccion_generacion import extrae_generacion
-from funciones.extraccion_intercambios import extrae_intercambios
+from src.funciones.extraccion_balance import extrae_balance
+from src.funciones.extraccion_demanda import extrae_demanda
+from src.funciones.extraccion_generacion import extrae_generacion
+from src.funciones.extraccion_intercambios import extrae_intercambios
 
-from funciones.limpia_demanda import limpia_demanda
-from funciones.limpia_balance import limpia_balance
-from funciones.limpia_generacion import limpia_generacion
-from funciones.limpia_intercambio import limpia_intercambio
+from src.funciones.limpia_demanda import limpia_demanda
+from src.funciones.limpia_balance import limpia_balance
+from src.funciones.limpia_generacion import limpia_generacion
+from src.funciones.limpia_intercambio import limpia_intercambio
 
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
