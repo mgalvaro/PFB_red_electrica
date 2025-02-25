@@ -95,9 +95,11 @@ def run_query() -> tuple:
         
         ultima_extraccion = pd.to_datetime(df_dict[tabla]["fecha_extraccion"]).max()
         st.write(f"ultima extraccion: {ultima_extraccion}")
-        while ultima_extraccion < hoy.hour:
+        while ultima_extraccion < hoy:
             ultima_extraccion += pd.Timedelta(days=1)
-            dias_faltantes.append(ultima_extraccion)
+            if ultima_extraccion <= hoy:
+                dias_faltantes.append(ultima_extraccion)
+            
     
         # Guardar las fechas faltantes en el diccionario con la tabla como clave
         fechas_faltantes[tabla] = dias_faltantes
