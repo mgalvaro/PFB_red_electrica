@@ -38,7 +38,7 @@ def limpia_columnas(dataframe) -> pd.DataFrame:
     else:
         dataframe = dataframe.drop(columns=["magnitude", "color", "description", "last-update"])
 
-    #dataframe["fecha"] = pd.to_datetime(dataframe["fecha"])
-    #dataframe["fecha_extraccion"] = pd.to_datetime(dataframe["fecha_extraccion"])
+    dataframe["fecha"] = pd.to_datetime(dataframe["fecha"])
+    dataframe["fecha_extraccion"] = pd.to_datetime(dataframe["fecha_extraccion"])
 
     return dataframe

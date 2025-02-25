@@ -102,6 +102,11 @@ def run_query() -> tuple:
 def agregar_datos_supabase(tabla, datos) -> dict:
 
     supabase = init_connection()
+
+    datos = datos.copy()
+    for col in datos.select_dtypes(include=["datetime", "datetime64[ns]"]).columns:
+        datos[col] = datos[col].dt.strftime('%Y-%m-%d')  # Convierte a string en formato 'YYYY-MM-DD'
+        
     registros = datos.to_dict(orient="records")  # Convierte el DataFrame a una lista de diccionarios
     
     try:
