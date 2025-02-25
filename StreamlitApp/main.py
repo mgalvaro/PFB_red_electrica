@@ -3,10 +3,10 @@ import streamlit as st
 import pandas as pd
 import os
 
-from src.funciones.extraccion_balance import *
-from src.funciones.extraccion_demanda import *
-from src.funciones.extraccion_generacion import *
-from src.funciones.extraccion_intercambios import *
+from funciones.extraccion_balance import *
+from funciones.extraccion_demanda import *
+from funciones.extraccion_generacion import *
+from funciones.extraccion_intercambios import *
 
 from config import PAGE_CONFIG
 
