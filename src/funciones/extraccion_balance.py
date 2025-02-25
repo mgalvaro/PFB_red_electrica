@@ -1,5 +1,4 @@
-#from funciones.parametros import *
-from parametros import *
+from src.funciones.parametros import *
 import pandas as pd
 import requests
 from datetime import datetime
