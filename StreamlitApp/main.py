@@ -11,15 +11,15 @@ from supabase import create_client
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from src.funciones import extrae_balance
-from src.funciones import extrae_demanda
-from src.funciones import extrae_generacion
-from src.funciones import extrae_intercambios
+from src.funciones.extraccion_balance import extrae_balance
+from src.funciones.extraccion_demanda import extrae_demanda
+from src.funciones.extraccion_generacion import extrae_generacion
+from src.funciones.extraccion_intercambios import extrae_intercambios
 
-from src.funciones import limpia_demanda
-from src.funciones import limpia_balance
-from src.funciones import limpia_generacion
-from src.funciones import limpia_intercambio
+from src.funciones.limpia_demanda import limpia_demanda
+from src.funciones.limpia_balance import limpia_balance
+from src.funciones.limpia_generacion import limpia_generacion
+from src.funciones.limpia_intercambio import limpia_intercambio
 
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
