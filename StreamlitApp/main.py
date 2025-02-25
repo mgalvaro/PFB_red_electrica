@@ -112,7 +112,7 @@ def agregar_datos_supabase(tabla, datos) -> dict:
             st.error(f"Error al agregar datos a '{tabla}': {response.status_code} - {response.json()}")
         return response
     except Exception as e:
-        st.write(response)
+        st.write(registros)
         st.error(f"Error al agregar datos a '{tabla}': {str(e)}")
         return None
 
