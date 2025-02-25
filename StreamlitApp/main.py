@@ -58,7 +58,7 @@ def run_query() -> tuple:
     df_intercambios = pd.read_csv('data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')
     df_balance = pd.read_csv('data/processed/DF_BALANCE_10_25_LIMPIO.csv')
 
-    hoy = datetime.now().strftime("%Y-%m-%d")
+    hoy = datetime.now()
 
     ultimas_extracciones = {}
     #supabase = init_connection()
