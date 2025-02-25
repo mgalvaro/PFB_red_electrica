@@ -101,6 +101,7 @@ def run_query() -> tuple:
 
 def agregar_datos_supabase(tabla, datos) -> dict:
 
+    st.write(datos)
     supabase = init_connection()
     registros = datos.to_dict(orient="records")  # Convierte el DataFrame a una lista de diccionarios
     
