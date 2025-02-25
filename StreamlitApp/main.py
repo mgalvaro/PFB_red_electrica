@@ -16,6 +16,9 @@ from src.funciones.extraccion_demanda import extrae_demanda
 from src.funciones.extraccion_generacion import extrae_generacion
 from src.funciones.extraccion_intercambios import extrae_intercambios
 
+from src.funciones.divide_fecha import divide_fecha
+from src.funciones.limpia_columnas import limpia_columnas
+
 from src.funciones.limpia_demanda import limpia_demanda
 from src.funciones.limpia_balance import limpia_balance
 from src.funciones.limpia_generacion import limpia_generacion
@@ -130,6 +133,8 @@ def main():
 
             if tabla == "demanda":
                 nuevos_datos_demanda = extrae_demanda(fecha[0], hoy)
+                nuevos_datos_demanda = divide_fecha(nuevos_datos_demanda)
+                nuevos_datos_demanda = limpia_columnas(nuevos_datos_demanda)
                 nuevos_datos_demanda = limpia_demanda(nuevos_datos_demanda)
 
                 if len(nuevos_datos_demanda) > 0:
@@ -141,6 +146,8 @@ def main():
 
             elif tabla == "generacion":
                 nuevos_datos_generacion = extrae_generacion(fecha[0], hoy)
+                nuevos_datos_generacion = divide_fecha(nuevos_datos_generacion)
+                nuevos_datos_generacion = limpia_columnas(nuevos_datos_generacion)
                 nuevos_datos_generacion = limpia_generacion(nuevos_datos_generacion)
 
                 if len(nuevos_datos_generacion) > 0:
@@ -152,6 +159,8 @@ def main():
 
             elif tabla == "intercambios":
                 nuevos_datos_intercambios = extrae_intercambios(fecha[0], hoy)
+                nuevos_datos_intercambios = divide_fecha(nuevos_datos_intercambios)
+                nuevos_datos_intercambios = limpia_columnas(nuevos_datos_intercambios)
                 nuevos_datos_intercambios = limpia_intercambio(nuevos_datos_intercambios)
 
                 if len(nuevos_datos_intercambios) > 0:
@@ -160,9 +169,11 @@ def main():
                     df_intercambios = pd.concat([df_intercambios, nuevos_datos_intercambios]).drop_duplicates()
                 else:
                     st.write(f"No se encontraron nuevos datos para la tabla '{tabla}'.")
-                    
+
             elif tabla == "balance":
                 nuevos_datos_balance = extrae_balance(fecha[0], hoy)
+                nuevos_datos_balance = divide_fecha(nuevos_datos_balance)
+                nuevos_datos_balance = limpia_columnas(nuevos_datos_balance)
                 nuevos_datos_balance = limpia_balance(nuevos_datos_balance)
 
                 if len(nuevos_datos_balance) > 0:
