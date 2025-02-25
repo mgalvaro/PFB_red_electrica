@@ -3,15 +3,14 @@ import streamlit as st
 import pandas as pd
 import os
 
-from funciones.extraccion_balance import *
-from funciones.extraccion_demanda import *
-from funciones.extraccion_generacion import *
-from funciones.extraccion_intercambios import *
-
 from config import PAGE_CONFIG
 
 from supabase import create_client
 
+from extraccion_balance import extrae_balance
+from extraccion_demanda import extrae_demanda
+from extraccion_generacion import extrae_generacion
+from extraccion_intercambios import extrae_intercambios
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
 from vis_compare_years import vis_compare
