@@ -65,6 +65,8 @@ def run_query() -> tuple:
 
         ultimas_fechas[tabla] = get_latest_fecha(tabla)
 
+    st.write(f"Ultimas fechas: {ultimas_fechas}")
+
     fechas_faltantes = {}
 
     df_dict = {
@@ -97,24 +99,6 @@ def agregar_datos_supabase(tabla, datos) -> dict:
     except Exception as e:
         st.error(f"Error al agregar datos a '{tabla}': {str(e)}")
         return None
-
-    ''' # Ejecuta las consultas
-    actualiza_demanda = supabase.table("demanda").select("*").eq("titulo", "Demanda").execute()
-    actualiza_generacion = supabase.table("generacion").select("*").execute()
-    actualiza_intercambios = supabase.table("intercambios").select("*").execute()
-    actualiza_balance = supabase.table("balance").select("*").execute()
-    
-    # Accede a los datos en el atributo `.data`
-    demanda_data = demanda.data if demanda and demanda.data else None
-    generacion_data = generacion.data if generacion and generacion.data else None
-    intercambios_data = intercambios.data if intercambios and intercambios.data else None
-    balance_data = balance.data if balance and balance.data else None
-
-    if demanda_data and generacion_data and intercambios_data and balance_data:
-        return demanda_data, generacion_data, intercambios_data, balance_data
-    else:
-        return None, None, None, None'''
-
 
 def main():
 
