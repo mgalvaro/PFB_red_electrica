@@ -115,11 +115,12 @@ def agregar_datos_supabase(tabla, datos) -> dict:
 def main():
 
     st.write("main")
-'''    hoy = datetime.now().strftime("%Y-%m-%d")
+    hoy = datetime.now().strftime("%Y-%m-%d")
 
     df_demanda, df_generacion, df_intercambios, df_balance, fechas_faltantes = run_query()
 
-    # Proceso de extracción y actualización de datos
+    st.write(f"{fechas_faltantes}")
+    '''# Proceso de extracción y actualización de datos
     if fechas_faltantes:
         st.write("Procesando fechas faltantes...")
 
