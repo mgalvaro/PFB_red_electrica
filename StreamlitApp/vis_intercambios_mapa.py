@@ -20,7 +20,7 @@ def vis_intercambios(df):
     df_coord = pd.DataFrame(coord_paises)
 
     periodo_dict = {
-                    #"Últimos 7 días": 7,
+                    "Últimos 7 días": 7,
                     "Últimos 30 días": 30,
                     "Últimos 365 días": 365,
                     "Histórico": -1 
