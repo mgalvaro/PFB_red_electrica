@@ -18,10 +18,10 @@ def vis_generacion(df):
     col1, col2 = st.columns(2)
 
     with col1:
-        start_date = st.date_input("Fecha de inicio").strftime('%Y-%m-%d')
+        start_date = st.date_input("Fecha de inicio")#.strftime('%Y-%m-%d')
         
     with col2:
-        end_date = st.date_input("Fecha de fin").strftime('%Y-%m-%d')
+        end_date = st.date_input("Fecha de fin")#.strftime('%Y-%m-%d')
 
 
     zonas = df['zona'].unique().tolist()
@@ -33,7 +33,7 @@ def vis_generacion(df):
                            )
     
     if len(zona) != 1:
-        st.warning('Escoger una zona')
+        st.warning(':warning: Escoger una zona')
     
     else:
         df = df[(df['fecha'] >= start_date) & (df['fecha'] <= end_date)]
@@ -48,6 +48,7 @@ def vis_generacion(df):
                     labels={'fecha': "Fecha", 'valor_(GWh)': "Generación (GWh)", 'titulo': "Tecnología"}
                     )
     
+        fig.update_xaxes(tickformat="%d-%b-%Y")
         st.plotly_chart(fig)
 
         st.divider()

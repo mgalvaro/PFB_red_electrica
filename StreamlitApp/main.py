@@ -10,10 +10,12 @@ from vis_compare_years import vis_compare
 from vis_generacion import vis_generacion
 from functions.carga_dataframes import *
 
+from passwords import pw
+
 # Configuración de conexión
 host = "localhost"
 user = "root"
-password = "root"
+password = pw
 database = "red_electrica"
 
 def main():

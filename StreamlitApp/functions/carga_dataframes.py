@@ -31,15 +31,20 @@ def carga_dataframes(host, user, password, database):
     # Borrar datos de todas las tablas
     for tabla in df_dict.keys():
 
+        # select_from_bbdd = f"SELECT * FROM {tabla.upper()};"
+        # cursor.execute(select_from_bbdd)
+        # df_dict[tabla] = pd.DataFrame(cursor.fetchall())
+        # select_columns = f"SELECT column_name FROM information_schema.COLUMNS WHERE table_name = '{tabla.upper()}'"
+        # cursor.execute(select_columns)
+        # columns = [col[0] for col in cursor.fetchall()]
+        # df_dict[tabla].columns = columns
+
         select_from_bbdd = f"SELECT * FROM {tabla.upper()};"
         cursor.execute(select_from_bbdd)
-        df_dict[tabla] = pd.DataFrame(cursor.fetchall())
+        data = cursor.fetchall()
+        column_names = [desc[0] for desc in cursor.description]
+        df_dict[tabla] = pd.DataFrame(data, columns=column_names)
 
-        select_columns = f"SELECT column_name FROM information_schema.COLUMNS WHERE table_name = '{tabla.upper()}'"
-        cursor.execute(select_columns)
-        columns = [col[0] for col in cursor.fetchall()]
-
-        df_dict[tabla].columns = columns
 
     cursor.close()
     db.close()

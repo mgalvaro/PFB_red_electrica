@@ -60,16 +60,22 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
             df = filtro_intercambios(df_intercambios, year1, year2)
             ldash='tipo'
 
-        with st.expander(label = f"DataFrame Filtrado:", expanded = False):
-            st.dataframe(df[0])
+        # with st.expander(label = f"DataFrame Filtrado:", expanded = False):
+        #     st.dataframe(df[0])
+
+        df[0]['fecha_sin_year'] = pd.to_datetime(df[0]['fecha_sin_year'])
+        df[0]['fecha_sin_year'] = df[0]['fecha_sin_year'].dt.to_period('W')
+        df_0 = df[0].groupby(['fecha_sin_year', 'año']).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
+        df_0['fecha_sin_year'] = df_0['fecha_sin_year'].astype(str)
+        df_0['fecha_sin_year'] = df_0['fecha_sin_year'].apply(lambda x : x[:10])
 
 
         fig = px.line(
-            data_frame=df[0],
+            data_frame=df_0,
             x='fecha_sin_year',
             y='valor_(GWh)',
             color='año',
-            title=f"<b>{variable.title()}</b> nacional de energía a lo largo del año para {year1} y {year2}",
+            title=f"<b>{variable.title()}</b> nacional de energía a lo largo del año para {year1} y {year2} (media semanal)",
             labels={'fecha_sin_year': 'Fecha', 'valor_(GWh)': 'Generación (GWh)', 'año': 'Año'},
             line_dash=ldash,
             color_discrete_sequence=["#32CD32", "#8B00FF"]

@@ -32,10 +32,11 @@ def p7_30_365_hist(df, p):
     """
 
     if p > 0:
-        today = datetime.strptime(df['fecha'].max(), "%Y-%m-%d")
+        # today = datetime.strptime(df['fecha'].max(), "%Y-%m-%d")
+        today = df['fecha'].max()
         delta = timedelta(days=p)
-        start_date = (today - delta).strftime("%Y-%m-%d")
-        end_date = today.strftime("%Y-%m-%d")
+        start_date = (today - delta)#.strftime("%Y-%m-%d")
+        end_date = today#.strftime("%Y-%m-%d")
 
         df = df[(start_date <= df['fecha']) & (df['fecha']<= end_date)].reset_index(drop=True)
         
