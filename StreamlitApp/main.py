@@ -1,8 +1,6 @@
 from datetime import datetime
 import streamlit as st
 import pandas as pd
-import os
-import sys
 
 from config import PAGE_CONFIG
 
@@ -10,18 +8,22 @@ from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
 from vis_compare_years import vis_compare
 from vis_generacion import vis_generacion
+from functions.carga_dataframes import *
+
+# Configuración de conexión
+host = "localhost"
+user = "root"
+password = "root"
+database = "red_electrica"
 
 def main():
 
-    # st.write("Directorio actual:", os.getcwd())
-    # st.write("Archivos en el directorio actual:", os.listdir("."))
-    # st.write("Archivos en '../data/processed':", os.listdir("../data/processed") if os.path.exists("../data/processed") else "No encontrado")
-        
-    df_demanda = pd.read_csv('../data/processed/DF_DEMANDA_10_25_LIMPIO.csv')
+    try:
+        df_balance, df_demanda, df_generacion, df_intercambios = carga_dataframes(host, user, password, database)
+    except Exception:
+        st.error(":exclamation: Error al cargar los datos")
+    
     df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
-    df_generacion = pd.read_csv('../data/processed/DF_GENERACION_10_25_LIMPIO.csv')
-    df_intercambios = pd.read_csv('../data/processed/DF_INTERCAMBIOS_10_25_LIMPIO.csv')
-
     
     menu = ['Inicio', 'Serie Temporal Demanda', 'Mapa de Intercambios', 'Comparación Anual', 'Generación por tecnología']
 
