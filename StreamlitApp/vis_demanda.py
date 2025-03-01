@@ -31,22 +31,38 @@ def vis_demanda(df):
     
     periodo_seleccionado = periodos_dict[periodo]
 
-    df_filtered = p7_30_365_hist(df, periodo_seleccionado)[0]
-    periodo_seleccionado = p7_30_365_hist(df, periodo_seleccionado)[1]
+    df_filtered = p7_30_365_hist(df, periodo_seleccionado)
+    
+    # with st.expander(label = f"DataFrame Filtrado", expanded = False):
+    #     st.dataframe(df_filtered)
+            
+    if periodo_seleccionado != -1:
 
-    p_selec = 'días' if periodo_seleccionado > 0 else 'años'
+        if periodo_seleccionado == 365:
+            p_selec = f'último año (media semanal)'
+            df_filtered = p_365_mas(df_filtered, 'W')
+
+        else:
+            p_selec = f'últimos {periodo_seleccionado} días' 
+        
+    else:
+        p_selec = 'histórico (media trimestral)'
+        df_filtered = p_365_mas(df_filtered, 'Q')
+
     
 
-    with st.expander(label = f"DataFrame Filtrado para {periodo_seleccionado} {p_selec}", expanded = False):
+    with st.expander(label = f"DataFrame Filtrado: {p_selec}", expanded = False):
         st.dataframe(df_filtered)
         
     fig = px.line(df_filtered, 
                   x = "fecha", 
-                  y = "valor_(MWh)", 
+                  y = "valor_(GWh)", 
                   color='zona', 
-                  title = f"Demanda eléctrica en España de los últimos {periodo_seleccionado} días",
-                  labels={'fecha': "Fecha", 'valor_(MWh)': "Demanda (MWh)", 'zona': "Zona"}
+                  title = f"Demanda eléctrica en España: {p_selec}",
+                  labels={'fecha': "Fecha", 'valor_(GWh)': "Demanda (GWh)", 'zona': "Zona"}
                   )
+    
+    fig.update_xaxes(tickformat="%d-%b-%Y")
     
     st.plotly_chart(fig)
 

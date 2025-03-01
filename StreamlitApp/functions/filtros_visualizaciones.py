@@ -38,13 +38,26 @@ def p7_30_365_hist(df, p):
         end_date = today.strftime("%Y-%m-%d")
 
         df = df[(start_date <= df['fecha']) & (df['fecha']<= end_date)].reset_index(drop=True)
-
+        
     else:
         
         df = df
         p = round(len(df)/365, 1)
 
-    return df, p
+    df['valor_(MWh)'] = df['valor_(MWh)'].apply(lambda x : x * 0.001)
+    df = df.rename(columns={'valor_(MWh)': 'valor_(GWh)'})
+
+    return df
+
+
+def p_365_mas(df, p):
+
+    df['fecha'] = pd.to_datetime(df['fecha'])
+    df['fecha'] = df['fecha'].dt.to_period(p)
+    df = df.groupby(['fecha', 'zona']).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
+    df['fecha'] = df['fecha'].astype(str)
+
+    return df
 
 
 
@@ -72,6 +85,10 @@ def filtro_intercambios(df, year1, year2):
     df_estadisticas = df.groupby(['año', 'tipo'])['valor_(GWh)'].agg(['mean', 'median', 'max', 'min']).reset_index(drop=False).rename(columns=renombrar)
     cols_to_round = df_estadisticas.columns.difference(['año'])
     df_estadisticas[cols_to_round] = df_estadisticas[cols_to_round].round(1)
+
+    # df['fecha_sin_year'] = df['fecha_sin_year'].dt.to_period('W')
+    # df = df.groupby(['fecha_sin_year', 'año']).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
+    # df['fecha_sin_year'] = df['fecha_sin_year'].astype(str)
     
     return df, df_estadisticas
 
@@ -100,6 +117,10 @@ def filtro_comparador(df, year1, year2):
     cols_to_round = df_estadisticas.columns.difference(['año'])
     df_estadisticas[cols_to_round] = df_estadisticas[cols_to_round].round(1)
 
+    # df['fecha_sin_year'] = df['fecha_sin_year'].dt.to_period('W')
+    # df = df.groupby(['fecha_sin_year']).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
+    # df['fecha_sin_year'] = df['fecha_sin_year'].astype(str)
+
 
     return df, df_estadisticas
 
@@ -124,6 +145,10 @@ def calculo_balance(df1, df2, year1, year2):
     df_estadisticas = df.groupby('año')['valor_(GWh)'].agg(['mean', 'median', 'max', 'min']).reset_index(drop=False).rename(columns=renombrar)
     cols_to_round = df_estadisticas.columns.difference(['año'])
     df_estadisticas[cols_to_round] = df_estadisticas[cols_to_round].round(1)
+
+    # df['fecha_sin_year'] = df['fecha_sin_year'].dt.to_period('W')
+    # df = df.groupby(['fecha_sin_year']).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
+    # df['fecha_sin_year'] = df['fecha_sin_year'].astype(str)
 
     return df, df_estadisticas
 

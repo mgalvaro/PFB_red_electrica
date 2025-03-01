@@ -36,7 +36,7 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
     
     
     if len(years_to_compare) != 2:
-        st.warning('Por favor, elige 2 años para comparar')
+        st.warning('Por favor, elige 2 años para comparar.')
 
     else:
 
@@ -60,6 +60,9 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
             df = filtro_intercambios(df_intercambios, year1, year2)
             ldash='tipo'
 
+        with st.expander(label = f"DataFrame Filtrado:", expanded = False):
+            st.dataframe(df[0])
+
 
         fig = px.line(
             data_frame=df[0],
@@ -72,30 +75,30 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
             color_discrete_sequence=["#32CD32", "#8B00FF"]
             )
 
-        fig.update_xaxes(tickformat="%m-%b")
+        fig.update_xaxes(tickformat="%d-%b")
 
         st.plotly_chart(fig)
 
         st.table(df[1])
 
-        if variables[variable] != 4:
-            df_stats = df[1].melt(id_vars=['año'], var_name='Métrica', value_name='Valor')
-            fc = None
-        else:
-            df_stats = df[1].melt(id_vars=['año', 'tipo'], var_name='Métrica', value_name='Valor')
-            fc='tipo'
+        # if variables[variable] != 4:
+        #     df_stats = df[1].melt(id_vars=['año'], var_name='Métrica', value_name='Valor')
+        #     fc = None
+        # else:
+        #     df_stats = df[1].melt(id_vars=['año', 'tipo'], var_name='Métrica', value_name='Valor')
+        #     fc='tipo'
+        with st.expander(label = f"DataFrame Filtrado:", expanded = False):
+                st.dataframe(df[0])
 
-        fig_stats = px.bar(df_stats,
-                           
-                            x='año', 
-                            y='Valor', 
-                            color='Métrica',
-                            facet_col=fc, 
-                            barmode='group', 
-                            title=f"Estadísticas de {variable} de energía por Año",
-                            labels={'Valor': 'GWh', 'año': 'Año', 'tipo': 'Tipo'},
-                            color_discrete_sequence=['#FF5733', '#33FF57', '#3357FF', '#FF33A1']
-
+        fig_stats = px.box(data_frame=df[0],
+                           x='año',
+                           y='valor_(GWh)',
+                           color='año',
+                            # facet_col=fc, 
+                            # barmode='group', 
+                            title=f"Boxplot de {variable} de energía por Año",
+                            labels={'valor_(GWh)': 'GWh', 'año': 'Año'},
+                            color_discrete_sequence=["#32CD32", "#8B00FF"]
                             )
         
         st.plotly_chart(fig_stats)
