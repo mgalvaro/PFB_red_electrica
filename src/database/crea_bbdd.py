@@ -3,11 +3,12 @@ import mysql.connector
 import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.types import Float, BigInteger
+from passwords import pw
 
 
 host = "localhost"
 user = "root"
-password = "root"
+password = pw
 database = "red_electrica"
 
 def crea_bbdd() -> str:
@@ -26,7 +27,7 @@ def crea_bbdd() -> str:
             fecha_extraccion DATETIME,
             categoria VARCHAR(255),
             zona VARCHAR(255),
-            valor_(MWh) FLOAT,
+            `valor_(MWh)` FLOAT,
             porcentaje FLOAT,
             fecha DATE NOT NULL,
             año INT,
@@ -44,7 +45,7 @@ def crea_bbdd() -> str:
             fecha_extraccion DATETIME,
             categoria VARCHAR(255),
             zona VARCHAR(255),
-            valor_(MWh) FLOAT,
+            `valor_(MWh)` FLOAT,
             porcentaje FLOAT,
             fecha DATE NOT NULL,
             año INT,
@@ -63,7 +64,7 @@ def crea_bbdd() -> str:
             categoria VARCHAR(255),
             frontera VARCHAR(255),
             zona VARCHAR(255),
-            valor_(MWh) FLOAT,
+            `valor_(MWh)` FLOAT,
             porcentaje FLOAT,
             fecha DATE NOT NULL,
             año INT,
@@ -81,7 +82,7 @@ def crea_bbdd() -> str:
             fecha_extraccion DATETIME,
             categoria VARCHAR(255),
             zona VARCHAR(255),
-            valor_(MWh) FLOAT,
+            `valor_(MWh)` FLOAT,
             porcentaje FLOAT,
             fecha DATE NOT NULL,
             año INT,
@@ -106,8 +107,13 @@ def crea_bbdd() -> str:
     cursor.execute(usr_db_query)
     cursor.fetchall()
 
-    cursor.execute(db_query, multi=True)
-    cursor.fetchall()
+    for query in db_query.split(";"):
+        if query.strip():  # Evita ejecutar consultas vacías
+            cursor.execute(query)
+            cursor.fetchall()
+
+    # cursor.execute(db_query, multi=True)  
+    # cursor.fetchall()
     
     cursor.close()
     db.close()
