@@ -6,8 +6,8 @@ import calendar
 from sklearn.preprocessing import MinMaxScaler
 
 # Definir rutas de los datos
-ruta_datos = "C:/Users/nacho/Desktop/Aprendiendo a programar/PFB/TFB/data/processed"
-ruta_datos_escalados = "C:/Users/nacho/Desktop/Aprendiendo a programar/PFB/TFB/data/data_scaled"
+ruta_datos = "../data/processed"
+ruta_datos_escalados = "../data/data_scaled"
 ruta_scalers = os.path.join(ruta_datos_escalados, "scalers")
 
 # Crear carpetas si no existen
@@ -16,9 +16,9 @@ def crear_carpetas():
     os.makedirs(ruta_scalers, exist_ok=True)
 
 # Función para cargar y filtrar datos
-def cargar_y_filtrar_datos(nombre_archivo):
-    ruta_archivo = os.path.join(ruta_datos, nombre_archivo)
-    df_demanda = pd.read_csv(ruta_archivo)
+def cargar_y_filtrar_datos(df_demanda):
+    #ruta_archivo = os.path.join(ruta_datos, nombre_archivo)
+    #df_demanda = pd.read_csv(ruta_archivo)
 
     # Filtrar solo la zona nacional y la demanda
     df = df_demanda[(df_demanda['zona'] == 'nacional') & (df_demanda['titulo'] == 'Demanda')]
@@ -79,11 +79,11 @@ def escalar_consumo_anio(df, nombre_scaler):
     return df
 
 # Función principal de procesamiento
-def procesar_datos():
-    crear_carpetas()
+def procesar_datos(dataframe):
+    #crear_carpetas()
     
-    nombre_archivo = "DF_DEMANDA_10_25_LIMPIO.csv"
-    df = cargar_y_filtrar_datos(nombre_archivo)
+    #nombre_archivo = "DF_DEMANDA_10_25_LIMPIO.csv"
+    df = cargar_y_filtrar_datos(dataframe)
 
     print("Columnas antes de procesar:", df.columns)  # Verifica que 'dia' está presente
 
@@ -113,6 +113,8 @@ def procesar_datos():
 
     print("Procesamiento completado. Datos preparados y guardados.")
 
+    return df
+
 # Ejecutar script
-if __name__ == "__main__":
-    procesar_datos()
+#if __name__ == "__main__":
+#    procesar_datos()
