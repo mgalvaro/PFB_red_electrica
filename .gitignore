@@ -2,7 +2,6 @@ venv/
 __pycache__/
 .ipynb_checkpoints/
 *.pyc
-*test*
 *PRUEBA*
 secrets.toml
 actualizar_db.ipynb
