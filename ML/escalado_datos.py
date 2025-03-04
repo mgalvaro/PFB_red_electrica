@@ -23,7 +23,7 @@ def cargar_y_filtrar_datos(df_demanda):
 
     # Filtrar solo la zona nacional y la demanda
     df = df_demanda[(df_demanda['zona'] == 'nacional') & (df_demanda['titulo'] == 'Demanda')]
-    df = df[['valor_(MWh)', 'año', 'mes', 'dia', 'dia_semana']].reset_index(drop=True)
+    df = df[['valor_(MWh)', 'fecha', 'año', 'mes', 'dia', 'dia_semana']].reset_index(drop=True)
 
     # Convertir MWh a GWh
     df['valor_(GWh)'] = df['valor_(MWh)'] * 0.001
