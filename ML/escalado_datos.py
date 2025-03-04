@@ -3,6 +3,7 @@ import pickle
 import pandas as pd
 import numpy as np
 import calendar
+from holidays import Spain
 from sklearn.preprocessing import MinMaxScaler
 
 # Definir rutas de los datos
@@ -84,6 +85,13 @@ def procesar_datos(dataframe):
     
     #nombre_archivo = "DF_DEMANDA_10_25_LIMPIO.csv"
     df = cargar_y_filtrar_datos(dataframe)
+
+    festivos = Spain(years=df["año"].unique())
+
+    df["fecha"] = df["fecha"].astype("datetime64[ns]")
+    
+    # Verificar si la fecha está en festivos
+    df["es_festivo"] = df["fecha"].apply(lambda x: 1 if x in festivos else 0)
 
     print("Columnas antes de procesar:", df.columns)  # Verifica que 'dia' está presente
 
