@@ -2,12 +2,13 @@ import pandas as pd
 import sqlalchemy
 import mysql.connector
 from sqlalchemy import create_engine, text
+# from passwords import pw
 
 
 # Configuración de conexión
 host = "localhost"
 user = "root"
-password = "root"
+pw = 'Merlinku16/'
 database = "red_electrica"
 
 def actualiza_bbdd(df_balance_historico, df_demanda_historico, df_generacion_historico, df_intercambios_historico) -> None:
@@ -16,7 +17,7 @@ def actualiza_bbdd(df_balance_historico, df_demanda_historico, df_generacion_his
     db = mysql.connector.connect(
         host=host,
         user=user,
-        password=password,
+        password=pw,
         database=database
     )
     cursor = db.cursor()
@@ -41,7 +42,7 @@ def actualiza_bbdd(df_balance_historico, df_demanda_historico, df_generacion_his
     db.close()
 
     # Conexión con SQLAlchemy para usar to_sql y simplificar el proceso
-    engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{database}")
+    engine = create_engine(f"mysql+pymysql://{user}:{pw}@{host}/{database}")
 
     # Insertar los datos con to_sql
     for tabla, dataframe in df_dict.items():
