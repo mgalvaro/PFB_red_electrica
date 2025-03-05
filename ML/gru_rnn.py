@@ -20,8 +20,6 @@ from tensorflow.keras.models import Sequential # type: ignore
 from tensorflow.keras.layers import GRU, Dense, Input, Dropout # type: ignore
 from tensorflow.keras.callbacks import EarlyStopping # type: ignore
 
-
-
 # Cargar el scaler
 with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br") as file:
     scaler = pkl.load(file)
@@ -54,7 +52,18 @@ def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple:
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
     history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=50, verbose=0, callbacks=[early_stopping])
-    return model, history
+    if len_secuencia == 7:
+        with open("gru_model7.pkl", "bw") as file:
+            pickle.dump(model,file)
+            return model, history
+    elif len_secuencia == 15:
+        with open("gru_model15.pkl", "bw") as file:
+            pickle.dump(model,file)
+            return model, history
+    if len_secuencia == 30:
+        with open("gru_model30.pkl", "bw") as file:
+            pickle.dump(model,file)
+            return model, history
 
 # Función para graficar loss y mae
 def grafica_loss_mae(historial) -> None:
@@ -224,47 +233,140 @@ def vis_gru(dataframe):
     if ventana_input != None:
         
         ventana_seleccionada = ventanas_dict[ventana_input]
-        ventana = ventana_seleccionada
 
         df = procesar_datos(dataframe)
         df = df.drop(columns="fecha")
         TARGET = df["valor_(GWh)"]
         n_features = len([col for col in df.columns if col != TARGET.name])
-        X, y = crea_secuencias(df, TARGET.name, ventana)
+        X, y = crea_secuencias(df, TARGET.name, ventana_seleccionada)
 
         # División en entrenamiento y test
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-        redimensiona(X_train, X_test, ventana, n_features)
+        redimensiona(X_train, X_test, ventana_seleccionada, n_features)
 
-        # Construir y entrenar el modelo
+        '''# Construir y entrenar el modelo
         st.text("...cargando datos, por favor espere...")
-        model, history = crea_gru(X.shape[2], ventana, X_train, X_test, y_train, y_test)
-        
-        # Graficado de loss-mae
-        st.plotly_chart(grafica_loss_mae(history))
+        model, history = crea_gru(X.shape[2], ventana_seleccionada, X_train, X_test, y_train, y_test)'''
 
-        # Creamos lista fechas para que las predicciones sean más legibles
-        fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+        if ventana_seleccionada == 7:
+            
+            with open("../ML/MODELS/GRU/gru_model7.pkl", "br") as file:
+                gru_model7 = pickle.load(file)
+            # Graficado de loss-mae
+            #st.plotly_chart(grafica_loss_mae(history))
 
-        # Predicciones 1-step
-        pred_1step, real_1step = predice_1step(model, X_test, y_test, scaler, ventana, num_dias=ventana)
+            # Creamos lista fechas para que las predicciones sean más legibles
+            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
 
-        # Predicciones multi-step
-        pred_multistep = predice_multistep(model, X_test, scaler, ventana, num_dias_multi=ventana)
+            st.text("...cargando datos, por favor espere...")
+            # Predicciones 1-step
+            pred_1step, real_1step = predice_1step(gru_model7, X_test, y_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
 
-        # Graficado de predicciones
-        st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
+            # Predicciones multi-step
+            pred_multistep = predice_multistep(gru_model7, X_test, scaler, ventana_seleccionada, num_dias_multi=ventana_seleccionada)
 
-        # Dataframes de predicciones
-        st.header("Predicciones")
-        with st.expander(label = f"Predicciones 1-Step", expanded = False):
-            pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
-            pred_1step["Fecha"] = fechas
-            st.dataframe(pred_1step)
+            # Predicciones multi-step
+            pred_futuro = predice_futuro(gru_model7, X_test, scaler, ventana_seleccionada, num_dias_futuro=ventana_seleccionada)
 
-        with st.expander(label = f"Predicciones MultiStep", expanded = False):
-            pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
-            pred_multistep["Fecha"] = fechas
-            st.dataframe(pred_multistep)
+            # Graficado de predicciones
+            st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
 
-        
+
+            # Dataframes de predicciones
+            '''st.header("Predicciones")
+            with st.expander(label = f"Predicciones 1-Step", expanded = False):
+                pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
+                pred_1step["Fecha"] = fechas
+                st.dataframe(pred_1step)
+
+            with st.expander(label = f"Predicciones MultiStep", expanded = False):
+                pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
+                pred_multistep["Fecha"] = fechas
+                st.dataframe(pred_multistep)'''
+
+            with st.expander(label = f"Predicciones Futuro", expanded = False):
+                pred_futuro = pd.DataFrame({"Predicción (GWh)":pred_futuro})
+                pred_futuro["Fecha"] = fechas
+                st.dataframe(pred_futuro)
+
+        elif ventana_seleccionada == 15:
+            
+            with open("../ML/MODELS/GRU/gru_model15.pkl", "br") as file:
+                gru_model15 = pickle.load(file)
+            # Graficado de loss-mae
+            #st.plotly_chart(grafica_loss_mae(history))
+
+            # Creamos lista fechas para que las predicciones sean más legibles
+            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+
+            st.text("...cargando datos, por favor espere...")
+            # Predicciones 1-step
+            pred_1step, real_1step = predice_1step(gru_model15, X_test, y_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+
+            # Predicciones multi-step
+            pred_multistep = predice_multistep(gru_model15, X_test, scaler, ventana_seleccionada, num_dias_multi=ventana_seleccionada)
+
+            # Predicciones multi-step
+            pred_futuro = predice_futuro(gru_model15, X_test, scaler, ventana_seleccionada, num_dias_futuro=ventana_seleccionada)
+
+            # Graficado de predicciones
+            st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
+
+
+            # Dataframes de predicciones
+            '''st.header("Predicciones")
+            with st.expander(label = f"Predicciones 1-Step", expanded = False):
+                pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
+                pred_1step["Fecha"] = fechas
+                st.dataframe(pred_1step)
+
+            with st.expander(label = f"Predicciones MultiStep", expanded = False):
+                pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
+                pred_multistep["Fecha"] = fechas
+                st.dataframe(pred_multistep)'''
+
+            with st.expander(label = f"Predicciones Futuro", expanded = False):
+                pred_futuro = pd.DataFrame({"Predicción (GWh)":pred_futuro})
+                pred_futuro["Fecha"] = fechas
+                st.dataframe(pred_futuro)
+
+        elif ventana_seleccionada == 30:
+            
+            with open("../ML/MODELS/GRU/gru_model30.pkl", "br") as file:
+                gru_model30 = pickle.load(file)
+            # Graficado de loss-mae
+            #st.plotly_chart(grafica_loss_mae(history))
+
+            # Creamos lista fechas para que las predicciones sean más legibles
+            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+
+            st.text("...cargando datos, por favor espere...")
+            # Predicciones 1-step
+            pred_1step, real_1step = predice_1step(gru_model30, X_test, y_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+
+            # Predicciones multi-step
+            pred_multistep = predice_multistep(gru_model30, X_test, scaler, ventana_seleccionada, num_dias_multi=ventana_seleccionada)
+
+            # Predicciones multi-step
+            pred_futuro = predice_futuro(gru_model30, X_test, scaler, ventana_seleccionada, num_dias_futuro=ventana_seleccionada)
+
+            # Graficado de predicciones
+            st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
+
+
+            # Dataframes de predicciones
+            '''st.header("Predicciones")
+            with st.expander(label = f"Predicciones 1-Step", expanded = False):
+                pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
+                pred_1step["Fecha"] = fechas
+                st.dataframe(pred_1step)
+
+            with st.expander(label = f"Predicciones MultiStep", expanded = False):
+                pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
+                pred_multistep["Fecha"] = fechas
+                st.dataframe(pred_multistep)'''
+
+            with st.expander(label = f"Predicciones Futuro", expanded = False):
+                pred_futuro = pd.DataFrame({"Predicción (GWh)":pred_futuro})
+                pred_futuro["Fecha"] = fechas
+                st.dataframe(pred_futuro)
