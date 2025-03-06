@@ -11,6 +11,8 @@ from vis_compare_years import vis_compare
 from vis_generacion import vis_generacion
 from functions.carga_dataframes import *
 
+from ML.gru_rnn import *
+
 from passwords import pw
 
 import sys
@@ -36,10 +38,10 @@ def main():
             
         menu = ['Serie Temporal Demanda', 'Mapa de Intercambios', 'Comparación Anual', 'Generación por tecnología']
 
-        choice = st.selectbox(label='Menu', options=menu, index=0)
+        choice = st.selectbox(label='Menu', options=menu, index=None, placeholder="Seleccione datos a visualizar")
 
         if choice == 'Serie Temporal Demanda':
-            vis_demanda(df_demanda)
+            vis_gru(df_demanda)
 
         elif choice == 'Mapa de Intercambios':
             vis_intercambios(df_intercambios)
@@ -54,7 +56,7 @@ def main():
             pass
     
     with tab3:
-        
+        st.header("En construcción...")
         menu = ['Deep Learning', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
         choice = st.selectbox(label='Modelos de predicción de demanda', options=menu, index=None, placeholder="Seleccione modelo ML")
@@ -63,8 +65,20 @@ def main():
             st.header("En construcción...")
 
         elif choice == 'Gated Recurrent Unit (GRU)':
-            vis_gru(df_demanda)
+            st.header("GRU RNN")
+            try:
+                df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
+                st.header("Métricas obtenidas")
+                st.dataframe(df_metricas)                
+            except FileNotFoundError:
+                st.error("No se ha encontrado ningún archivo relativo a la RNN GRU en el sistema, por favor ejecute la pestaña EDA")
 
+            try:
+                st.header("Representación LOSS-MAE")
+                st.image("../ML/MODELS/GRU/GRU_MAE.png")
+            except Exception:
+                st.error("No se ha encontrado ningún archivo relativo a LOSS-MAE en el sistema, por favor ejecute la pestaña EDA")
+            
         elif choice == 'Facebook Propeth':
             st.header("En construcción...")
         

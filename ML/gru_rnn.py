@@ -2,7 +2,7 @@ import streamlit as st
 
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta 
 
 import pickle as pkl
 import plotly.express as px
@@ -12,10 +12,12 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 from StreamlitApp.functions.carga_dataframes import *
+from StreamlitApp.vis_demanda import *
 from ML.escalado_datos import *
 from StreamlitApp.passwords import pw
 
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from tensorflow.keras.models import Sequential # type: ignore
 from tensorflow.keras.layers import GRU, Dense, Input, Dropout # type: ignore
 from tensorflow.keras.callbacks import EarlyStopping # type: ignore
@@ -38,34 +40,25 @@ def redimensiona(xtrain, xtest, ventana, n_features) -> str:
     xtest = xtest.reshape((xtest.shape[0], ventana, n_features)) 
     return f"X_train shape: {xtrain.shape}, X_test shape: {xtest.shape}"
 
-# Construcción del modelo GRU con más capas. Este modelo me parece más realista
-def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple:
+def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple: #--  agregar metricas en un df
     model = Sequential([
         Input(shape=(len_secuencia, input_shape)),
-        GRU(64, activation='tanh', return_sequences=True),  
+        GRU(64, activation='tanh'),  
         Dropout(0.3), 
-        GRU(64, activation='tanh', return_sequences=False),  
-        Dense(64, activation='relu'),
+        Dense(1, activation='relu'),
         Dropout(0.3),
         Dense(1, activation='linear') 
     ])
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
-    early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=50, verbose=0, callbacks=[early_stopping])
-    if len_secuencia == 7:
-        with open("gru_model7.pkl", "bw") as file:
-            pickle.dump(model,file)
-            return model, history
-    elif len_secuencia == 15:
-        with open("gru_model15.pkl", "bw") as file:
-            pickle.dump(model,file)
-            return model, history
-    if len_secuencia == 30:
-        with open("gru_model30.pkl", "bw") as file:
-            pickle.dump(model,file)
-            return model, history
+    #early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+    #history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=100, verbose=0, callbacks=[early_stopping])  2500 epochs sin early probar
+    history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=250, verbose=0)
+    
+    with open(f"MODELS/GRU/gru_model{len_secuencia}.pkl", "bw") as file:
+        pickle.dump(model,file)
+        return model, history
 
-# Función para graficar loss y mae
+# Función para graficar loss y mae 
 def grafica_loss_mae(historial) -> None:
     fig = px.line(data_frame=historial.history, 
                   y=['loss', 'val_loss'], 
@@ -78,15 +71,16 @@ def grafica_loss_mae(historial) -> None:
     
     fig.for_each_trace(lambda x: x.update(name="Pérdida Entrenamiento" if x.name == "loss" else "Pérdida Validación"))
 
-    return fig
+    fig.to_image("../ML/MODELS/GRU/GRU_MAE.webp")
+    fig.to_image("../ML/MODELS/GRU/GRU_MAE.png")
+    return None
 
-# Función para predecir 1-step
-def predice_1step(model, data, y, scaler, len_secuencia, num_dias) -> tuple:
-    validation_target = y[-num_dias:]
+# Función para predecir 1-step   
+def predice_1step(model, data, scaler, len_secuencia, num_dias) -> np.array:  # len_secuencia (T), num_dias a futuro solo para multistep
     validation_predictions = []
     
     i = -num_dias
-    while len(validation_predictions) < len(validation_target):
+    while len(validation_predictions) < num_dias:
         p = model.predict(data[i].reshape(1, len_secuencia, data.shape[2]))[0, 0]
         validation_predictions.append(p)
         i += 1
@@ -94,24 +88,22 @@ def predice_1step(model, data, y, scaler, len_secuencia, num_dias) -> tuple:
     # Crear arrays para revertir el escalado
     dummy_features = np.zeros((len(validation_predictions), 1))
     predictions_with_dummy = np.hstack([np.array(validation_predictions).reshape(-1, 1), dummy_features])
-    validation_target_dummy = np.hstack([validation_target.reshape(-1, 1), dummy_features])
 
     # Desescalar
     predictions_desescalado = scaler.inverse_transform(predictions_with_dummy)[:, 0]
-    validation_desescalado = scaler.inverse_transform(validation_target_dummy)[:, 0]
 
-    return predictions_desescalado, validation_desescalado
+    return predictions_desescalado
 
 # Función para predecir multi-step
-def predice_multistep(model, data, scaler, len_secuencia, num_dias_multi) -> np.array:
+def predice_multistep(model, data, scaler, len_secuencia, num_dias) -> np.array:
     predictions = []
     input_seq = data[-1].reshape(1, len_secuencia, data.shape[2])
     
-    for _ in range(num_dias_multi):
+    for _ in range(num_dias):
         pred = model.predict(input_seq)[0, 0]
         predictions.append(pred)
         input_seq = np.roll(input_seq, shift=-1, axis=1)  # Desplazar la secuencia
-        input_seq[0, -1, -1] = pred  # Actualizar con la predicción
+        input_seq[0, -1, -1] = pred  # Actualizar con la prediccióntest_data, 
     
     # Desescalar
     dummy_features = np.zeros((len(predictions), 1))
@@ -120,54 +112,60 @@ def predice_multistep(model, data, scaler, len_secuencia, num_dias_multi) -> np.
 
     return predictions_desescalado
 
-# Función para predecir x días en el futuro
-def predice_futuro(model, data, scaler, len_secuencia, num_dias_futuro) -> np.array:
-    predictions = []
-    input_seq = data[-1].reshape(1, len_secuencia, data.shape[2])
+def muestra_metricas(dataframe, len_seq, preds) -> pd.DataFrame:
 
-    for _ in range(num_dias_futuro):
-        # Generar predicción
-        pred = model.predict(input_seq, verbose=0)[0, 0]
-        predictions.append(pred)
-        
-        # Actualizar la secuencia de entrada con la predicción
-        input_seq = np.roll(input_seq, shift=-1, axis=1)
-        input_seq[0, -1, -1] = pred
+    df_validacion = dataframe[dataframe["zona"] == "nacional"][-len_seq:]["valor_(MWh)"]*0.001
+    dict_metricas = {
+        "r2" : r2_score(df_validacion, preds),
+        "mae_GWh" : mean_absolute_error(df_validacion, preds),
+        "rmse_GWh" : np.sqrt(mean_squared_error(df_validacion, preds))
+    }
+    return dict_metricas
 
-    # Desescalar las predicciones
-    dummy_features = np.zeros((len(predictions), 1))
-    predictions_with_dummy = np.hstack([np.array(predictions).reshape(-1, 1), dummy_features])
-    predictions_desescalado = scaler.inverse_transform(predictions_with_dummy)[:, 0]
-
-    return predictions_desescalado
-
-# Graficar las predicciones 1-step y multi-step
 def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
+    
+    real = real[(real['zona'] == 'nacional')]
+    #real['fecha'] = pd.to_datetime(real['fecha'], format='%Y-%m-%d')
+    
+    ultima_fecha = real['fecha'].iloc[-1]
+
+    fechas_futuras = [(ultima_fecha + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(len(pred_multistep))]
+
+    #fechas_pasadas = real['fecha'].dt.strftime("%Y-%m-%d").tolist()
+    fechas_pasadas = [fecha.strftime("%Y-%m-%d") for fecha in real['fecha']]
+
+    pred_1step = np.concatenate([[real['valor_(GWh)'].iloc[-1]], pred_1step])
+    pred_multistep = np.concatenate([[real['valor_(GWh)'].iloc[-1]], pred_multistep])
+    
     fig = go.Figure()
 
-    # Valores reales
+    # Valores reales (pasado)
+    valores_pasado = real['valor_(GWh)']    
     fig.add_trace(go.Scatter(
-        y=real,
-        mode='lines+markers',
-        name='Valores Reales',
+        x=fechas_pasadas,
+        y=valores_pasado,
+        mode='lines',
+        name='Valores Reales (Pasado)',
         line=dict(color='blue', width=2),
         marker=dict(size=6)
     ))
 
     # Predicciones 1-step
     fig.add_trace(go.Scatter(
+        x=fechas_futuras,
         y=pred_1step,
-        mode='lines+markers',
-        name=f'Predicciones 1-step',
+        mode='lines',
+        name='Predicciones 1-step',
         line=dict(color='red', width=2, dash='dot'),
         marker=dict(size=6)
     ))
 
     # Predicciones multi-step
     fig.add_trace(go.Scatter(
+        x=fechas_futuras,
         y=pred_multistep,
-        mode='lines+markers',
-        name=f'Predicciones Multi-step',
+        mode='lines',
+        name='Predicciones Multi-step',
         line=dict(color='green', width=2, dash='dot'),
         marker=dict(size=6)
     ))
@@ -176,62 +174,77 @@ def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
     fig.update_layout(
         title="Predicciones vs Valores Reales",
         title_x=0.5,
-        xaxis_title="Días",
+        xaxis_title="Fechas",
         yaxis_title="Demanda (GWh)",
         template="plotly_white",
         hovermode="x",
         xaxis=dict(
-            tickvals=list(range(len(pred_1step) + 1)),  
-            ticktext=[str(i) for i in range(1, len(pred_1step) + 1)]  
-        ))
-
+            tickformat="%Y-%m-%d",  # Formato de las fechas
+            tickangle=-45,
+            tickmode='array'
+        )
+    )
     return fig
 
-# Graficar las predicciones futuras
-def grafica_predicciones_futuras(pred_futuro) -> None:
-    fig = go.Figure()
+def vis_gru(dataframe) -> None:
 
-    # Predicciones futuras
-    fig.add_trace(go.Scatter(
-        y=pred_futuro,
-        mode='lines+markers',
-        name=f'Predicciones Futuras',
-        line=dict(color='orange', width=2, dash='dot'),
-        marker=dict(size=6)
-    ))
+    df_filtrado, periodo = vis_demanda(dataframe)
 
-    # Configuración de la gráfica
-    fig.update_layout(
-        title="Predicciones para Días Futuros",
-        title_x=0.5,
-        xaxis_title="Días Futuros",
-        yaxis_title="Demanda (GWh)",
-        template="plotly_white",
-        hovermode="x",
-        xaxis=dict(
-            tickvals=list(range(len(pred_futuro))),
-            ticktext=[str(i + 1) for i in range(len(pred_futuro))]
-        ))
+    if periodo != 365 and periodo != -1:
+        ver_predicciones = st.checkbox(label="Ver predicciones de demanda", value=False)
+    else:
+        ver_predicciones = False 
+    
+    if ver_predicciones == False:
 
-    return fig
+        zonas = df_filtrado["zona"].unique()
+        fig = go.Figure()
 
+        for zona in zonas:
+            df_historial = df_filtrado[df_filtrado["zona"] == zona] 
+            fig.add_trace(go.Scatter(
+                x=df_historial["fecha"],
+                y=df_historial["valor_(GWh)"],
+                mode='lines',
+                name=zona,
+                line=dict(width=2),
+                marker=dict(size=6)
+            ))
 
-def vis_gru(dataframe):
+            fig.update_layout(
+                title="Histórico Demanda",
+                title_x=0.5,
+                xaxis_title="Fechas",
+                yaxis_title="Demanda (GWh)",
+                template="plotly_white",
+                hovermode="x",
+                xaxis=dict(
+                    tickformat="%Y-%m-%d", 
+                    tickangle=-45,
+                    tickmode='array'
+                )
+            )
 
-    ventanas_dict = {
-
-        "Próximos 7 días": 7,
-        "Próximos 15 días": 15,
-        "Próximos 30 días": 30,
-    }
-
-    ventana_input = st.selectbox(label = "Selecciona el período",
-                    options = list(ventanas_dict.keys()),
-                    placeholder="Seleccione intervalo de predicción",
-                    index = None)
-
-    if ventana_input != None:
+        st.plotly_chart(fig)
+        with st.expander(label = f"DataFrame filtrado para período seleccionado", expanded = False):
+            st.dataframe(df_filtrado)
         
+    else:
+        st.info("Las predicciones sólo están disponible para territorio nacional")
+
+        df_filtrado = df_filtrado[(df_filtrado['zona'] == 'nacional')] 
+        ventanas_dict = {
+
+            "Próximos 7 días": 7,
+            "Próximos 15 días": 15,
+            "Próximos 30 días": 30,
+        }
+
+        ventana_input = st.selectbox(label = "Selecciona el período",
+                        options = list(ventanas_dict.keys()),
+                        placeholder="Seleccione intervalo de predicción",
+                        index = 0)
+            
         ventana_seleccionada = ventanas_dict[ventana_input]
 
         df = procesar_datos(dataframe)
@@ -240,133 +253,42 @@ def vis_gru(dataframe):
         n_features = len([col for col in df.columns if col != TARGET.name])
         X, y = crea_secuencias(df, TARGET.name, ventana_seleccionada)
 
-        # División en entrenamiento y test
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
         redimensiona(X_train, X_test, ventana_seleccionada, n_features)
 
-        '''# Construir y entrenar el modelo
-        st.text("...cargando datos, por favor espere...")
-        model, history = crea_gru(X.shape[2], ventana_seleccionada, X_train, X_test, y_train, y_test)'''
+        try:
+            with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
+                    gru_model = pickle.load(file)
+        except UnboundLocalError:
+            pass
 
-        if ventana_seleccionada == 7:
-            
-            with open("../ML/MODELS/GRU/gru_model7.pkl", "br") as file:
-                gru_model7 = pickle.load(file)
-            # Graficado de loss-mae
-            #st.plotly_chart(grafica_loss_mae(history))
+        fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+        pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+        pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+        metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
+        metricas_multistep = muestra_metricas(dataframe, ventana_seleccionada, pred_multistep)
+        st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
 
-            # Creamos lista fechas para que las predicciones sean más legibles
-            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+        st.header("Predicciones")
+        with st.expander(label = f"Predicciones 1-Step", expanded = False):
+            pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
+            pred_1step["Fecha"] = fechas
+            st.dataframe(pred_1step)
 
-            st.text("...cargando datos, por favor espere...")
-            # Predicciones 1-step
-            pred_1step, real_1step = predice_1step(gru_model7, X_test, y_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+        with st.expander(label = f"Predicciones MultiStep", expanded = False):
+            pred_multistep = pd.DataFrame({"valor_(GWh)":pred_multistep})
+            pred_multistep["Fecha"] = fechas
+            st.dataframe(pred_multistep)
+    
+    metricas = {
+    "modelo" : f"GRUmodel{ventana_seleccionada}",
+    "prediccion": ["1-step", "multi-step"],
+    "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
+    "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
+    "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
+    }
+    
+    df_metricas = pd.DataFrame(metricas)
+    df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False)
 
-            # Predicciones multi-step
-            pred_multistep = predice_multistep(gru_model7, X_test, scaler, ventana_seleccionada, num_dias_multi=ventana_seleccionada)
-
-            # Predicciones multi-step
-            pred_futuro = predice_futuro(gru_model7, X_test, scaler, ventana_seleccionada, num_dias_futuro=ventana_seleccionada)
-
-            # Graficado de predicciones
-            st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
-
-
-            # Dataframes de predicciones
-            '''st.header("Predicciones")
-            with st.expander(label = f"Predicciones 1-Step", expanded = False):
-                pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
-                pred_1step["Fecha"] = fechas
-                st.dataframe(pred_1step)
-
-            with st.expander(label = f"Predicciones MultiStep", expanded = False):
-                pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
-                pred_multistep["Fecha"] = fechas
-                st.dataframe(pred_multistep)'''
-
-            with st.expander(label = f"Predicciones Futuro", expanded = False):
-                pred_futuro = pd.DataFrame({"Predicción (GWh)":pred_futuro})
-                pred_futuro["Fecha"] = fechas
-                st.dataframe(pred_futuro)
-
-        elif ventana_seleccionada == 15:
-            
-            with open("../ML/MODELS/GRU/gru_model15.pkl", "br") as file:
-                gru_model15 = pickle.load(file)
-            # Graficado de loss-mae
-            #st.plotly_chart(grafica_loss_mae(history))
-
-            # Creamos lista fechas para que las predicciones sean más legibles
-            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
-
-            st.text("...cargando datos, por favor espere...")
-            # Predicciones 1-step
-            pred_1step, real_1step = predice_1step(gru_model15, X_test, y_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-
-            # Predicciones multi-step
-            pred_multistep = predice_multistep(gru_model15, X_test, scaler, ventana_seleccionada, num_dias_multi=ventana_seleccionada)
-
-            # Predicciones multi-step
-            pred_futuro = predice_futuro(gru_model15, X_test, scaler, ventana_seleccionada, num_dias_futuro=ventana_seleccionada)
-
-            # Graficado de predicciones
-            st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
-
-
-            # Dataframes de predicciones
-            '''st.header("Predicciones")
-            with st.expander(label = f"Predicciones 1-Step", expanded = False):
-                pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
-                pred_1step["Fecha"] = fechas
-                st.dataframe(pred_1step)
-
-            with st.expander(label = f"Predicciones MultiStep", expanded = False):
-                pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
-                pred_multistep["Fecha"] = fechas
-                st.dataframe(pred_multistep)'''
-
-            with st.expander(label = f"Predicciones Futuro", expanded = False):
-                pred_futuro = pd.DataFrame({"Predicción (GWh)":pred_futuro})
-                pred_futuro["Fecha"] = fechas
-                st.dataframe(pred_futuro)
-
-        elif ventana_seleccionada == 30:
-            
-            with open("../ML/MODELS/GRU/gru_model30.pkl", "br") as file:
-                gru_model30 = pickle.load(file)
-            # Graficado de loss-mae
-            #st.plotly_chart(grafica_loss_mae(history))
-
-            # Creamos lista fechas para que las predicciones sean más legibles
-            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
-
-            st.text("...cargando datos, por favor espere...")
-            # Predicciones 1-step
-            pred_1step, real_1step = predice_1step(gru_model30, X_test, y_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-
-            # Predicciones multi-step
-            pred_multistep = predice_multistep(gru_model30, X_test, scaler, ventana_seleccionada, num_dias_multi=ventana_seleccionada)
-
-            # Predicciones multi-step
-            pred_futuro = predice_futuro(gru_model30, X_test, scaler, ventana_seleccionada, num_dias_futuro=ventana_seleccionada)
-
-            # Graficado de predicciones
-            st.plotly_chart(grafica_predicciones(real_1step, pred_1step, pred_multistep))
-
-
-            # Dataframes de predicciones
-            '''st.header("Predicciones")
-            with st.expander(label = f"Predicciones 1-Step", expanded = False):
-                pred_1step = pd.DataFrame({"Predicción (GWh)":pred_1step})
-                pred_1step["Fecha"] = fechas
-                st.dataframe(pred_1step)
-
-            with st.expander(label = f"Predicciones MultiStep", expanded = False):
-                pred_multistep = pd.DataFrame({"Predicción (GWh)":pred_multistep})
-                pred_multistep["Fecha"] = fechas
-                st.dataframe(pred_multistep)'''
-
-            with st.expander(label = f"Predicciones Futuro", expanded = False):
-                pred_futuro = pd.DataFrame({"Predicción (GWh)":pred_futuro})
-                pred_futuro["Fecha"] = fechas
-                st.dataframe(pred_futuro)
+    return None
