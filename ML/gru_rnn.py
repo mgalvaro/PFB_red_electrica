@@ -12,7 +12,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 from StreamlitApp.functions.carga_dataframes import *
-from StreamlitApp.vis_demanda import *
+from ..StreamlitApp.vis_demanda import *
 from ML.escalado_datos import *
 from StreamlitApp.passwords import pw
 
@@ -255,13 +255,10 @@ def vis_gru(dataframe) -> None:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
         redimensiona(X_train, X_test, ventana_seleccionada, n_features)
-
-        try:
-            with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
-                    gru_model = pickle.load(file)
-        except UnboundLocalError:
-            pass
-
+   
+        with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
+                gru_model = pickle.load(file)
+  
         fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
         pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
         pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
