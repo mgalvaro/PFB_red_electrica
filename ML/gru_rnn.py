@@ -188,6 +188,9 @@ def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
 
 def vis_gru(dataframe) -> None:
 
+    metricas_1step = {"r2":None, "mae_GWh":None, "rmse_GWh":None}
+    metricas_multistep = {"r2":None, "mae_GWh":None, "rmse_GWh":None}
+
     df_filtrado, periodo = vis_demanda(dataframe)
 
     ventana_seleccionada = None
