@@ -290,6 +290,6 @@ def vis_gru(dataframe) -> None:
     }
     
     df_metricas = pd.DataFrame(metricas)
-    df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False)
+    #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
 
     return None
