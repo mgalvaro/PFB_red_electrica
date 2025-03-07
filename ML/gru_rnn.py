@@ -190,7 +190,7 @@ def vis_gru(dataframe) -> None:
 
     df_filtrado, periodo = vis_demanda(dataframe)
 
-    ver_predicciones = None
+    ventana_seleccionada = None
     if periodo != 365 and periodo != -1:
         ver_predicciones = st.checkbox(label="Ver predicciones de demanda", value=False)
     else:
