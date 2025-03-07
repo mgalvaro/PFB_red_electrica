@@ -12,7 +12,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 from StreamlitApp.functions.carga_dataframes import *
-from ..StreamlitApp.vis_demanda import *
+from StreamlitApp.vis_demanda import *
 from ML.escalado_datos import *
 from StreamlitApp.passwords import pw
 
