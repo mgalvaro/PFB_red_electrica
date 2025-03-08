@@ -259,37 +259,52 @@ def vis_gru(dataframe) -> None:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
         redimensiona(X_train, X_test, ventana_seleccionada, n_features)
+
+        menu_modelos = ['Deep Learning', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
+
+        modelo_input = st.selectbox(label="Seleccione modelo de predicción",
+                     options = menu_modelos,
+                     placeholder="Seleccione Modelo ML",
+                     index=None)
+        
+        if modelo_input == 'Deep Learning':
+            st.markdown("#### En construcción...")
+
+        elif modelo_input == 'Gated Recurrent Unit (GRU)':
    
-        with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
-                gru_model = pickle.load(file)
-  
-        fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
-        pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-        pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-        metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
-        metricas_multistep = muestra_metricas(dataframe, ventana_seleccionada, pred_multistep)
-        st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
-
-        st.header("Predicciones")
-        with st.expander(label = f"Predicciones 1-Step", expanded = False):
-            pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
-            pred_1step["Fecha"] = fechas
-            st.dataframe(pred_1step)
-
-        with st.expander(label = f"Predicciones MultiStep", expanded = False):
-            pred_multistep = pd.DataFrame({"valor_(GWh)":pred_multistep})
-            pred_multistep["Fecha"] = fechas
-            st.dataframe(pred_multistep)
+            with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
+                    gru_model = pickle.load(file)
     
-    metricas = {
-    "modelo" : f"GRUmodel{ventana_seleccionada}",
-    "prediccion": ["1-step", "multi-step"],
-    "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
-    "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
-    "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
-    }
-    
-    df_metricas = pd.DataFrame(metricas)
-    #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
+            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+            pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+            pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
+            metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
+            metricas_multistep = muestra_metricas(dataframe, ventana_seleccionada, pred_multistep)
+            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
+
+            st.header("Predicciones")
+            with st.expander(label = f"Predicciones 1-Step", expanded = False):
+                pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
+                pred_1step["Fecha"] = fechas
+                st.dataframe(pred_1step)
+
+            with st.expander(label = f"Predicciones MultiStep", expanded = False):
+                pred_multistep = pd.DataFrame({"valor_(GWh)":pred_multistep})
+                pred_multistep["Fecha"] = fechas
+                st.dataframe(pred_multistep)
+        
+            metricas = {
+            "modelo" : f"GRUmodel{ventana_seleccionada}",
+            "prediccion": ["1-step", "multi-step"],
+            "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
+            "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
+            "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
+            }
+            
+            df_metricas = pd.DataFrame(metricas)
+            #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
+        
+        elif modelo_input == 'Facebook Propeth':
+            st.markdown("#### En construcción...")
 
     return None
