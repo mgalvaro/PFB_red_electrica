@@ -271,7 +271,8 @@ def vis_gru(dataframe) -> None:
             with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
                     gru_model = pickle.load(file)
     
-            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+            #fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+            fechas = [(dataframe["fecha"].max() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
             pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
             pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
             metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
