@@ -11,6 +11,7 @@ from vis_intercambios_mapa import vis_intercambios
 from vis_compare_years import vis_compare
 from vis_generacion import vis_generacion
 from functions.carga_dataframes import *
+from social_icons import social_icons
 
 from ML.gru_rnn import *
 
@@ -112,31 +113,34 @@ def main():
     with tab4:
         st.markdown("### :zap: ¿Quiénes formamos parte de este proyecto? :zap:")
 
-        st.markdown("#### **Álvaro Mejía**:")
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([2, 1])
         with col1:
+            st.markdown("#### **Álvaro Mejía**:")
+            social_icons("alvaro-mejia-garcia", "mgalvaro")
+            st.markdown("Ingeniero aeroespacial de formación y actualmente trabajando en la industria farmacéutica en Polonia. "
+            "Desde hace más de un año, me he estado formando en ciencia de datos para especializarme en este campo y aportar mi experiencia y conocimiento a proyectos innovadores.")
+        with col2:
+            img_alvaro = Image.open("imagenes/amg.png")
+            st.image(img_alvaro, width=300)
+        st.markdown("---")
+
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.markdown("#### **Ignacio Barba**:")
+            social_icons("josé-ignacio-barba-quezada-621975b0", "NachoMijo")
             st.markdown("rellenar info")
         with col2:
             st.markdown("insertar foto")
         st.markdown("---")
 
-        st.markdown("#### **Ignacio Barba**:")
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([2, 1])
         with col1:
-            st.markdown("rellenar info")
+            st.markdown("#### **Javier Corrales**:")
+            social_icons("javiercorralesfdez", "javcorrfer")
+            st.markdown("""Optometrista con más de 15 años de experiencia y apasionado por la formación continua, me he embarcado en este proyecto para poder especializar mi perfil en el sector.""")
         with col2:
-            st.markdown("insertar foto")
-        st.markdown("---")
-
-        st.markdown("#### **Javier Corrales**:")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("""Optometrista con más de 15 años de experiencia y apasionado por la formación continua, me he embarcado en este proyecto para poder especializar mi perfil en el sector.
-                    [¡Sígueme en LinkedIn!](https://www.linkedin.com/in/javiercorralesfdez/)
-                    """)
-        with col2:
-            img_javi = Image.open("imagenes/jcf.jpg")
-            st.image(img_javi, width=100)
+            img_javi = Image.open("imagenes/jcf.png")
+            st.image(img_javi, width=300)
 
       
 if __name__ == '__main__':
