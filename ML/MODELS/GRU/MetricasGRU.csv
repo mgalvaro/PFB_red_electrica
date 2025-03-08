@@ -1,0 +1,3 @@
+modelo,prediccion,r2,mae_GWh,rmse_GWh
+GRUmodelNone,1-step,,,
+GRUmodelNone,multi-step,,,

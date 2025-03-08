@@ -4,12 +4,15 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from config import PAGE_CONFIG
+from PIL import Image
 
 from vis_demanda import vis_demanda
 from vis_intercambios_mapa import vis_intercambios
 from vis_compare_years import vis_compare
 from vis_generacion import vis_generacion
 from functions.carga_dataframes import *
+
+from ML.gru_rnn import *
 
 from passwords import pw
 
@@ -20,7 +23,7 @@ from ML.gru_rnn import *
 
 def main():
     st.set_page_config(page_title="APP de datos REE", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
-    tab1, tab2, tab3 = st.tabs(["INICIO", "EDA", "ML"])
+    tab1, tab2, tab3, tab4 = st.tabs(["HOME", "EDA", "ML", "ABOUT US"])
 
     try:
         df_balance, df_demanda, df_generacion, df_intercambios = carga_dataframes(pw["host"], pw["user"], pw["password"], pw["database"])
@@ -28,18 +31,41 @@ def main():
         st.error(":exclamation: Error al cargar los datos")
 
     with tab1:
-        st.markdown('### :zap: Bienvenido a la App de datos de la REE :zap:')
-            
+        st.markdown('### :zap: Bienvenid@ a la App de datos de la REE :zap:')
+
+        st.markdown("""
+                #### Este proyecto ofrece una interfaz simple e intuitiva para cualquier persona interesada en el sector eléctrico de España. 
+
+                Gracias a [REData API](https://www.ree.es/es/datos/apidatos), un servicio informativo gratuito puesto a disposición por Grupo Red Eléctrica (grupo empresarial multinacional de origen español que actúa en el mercado eléctrico internacional como operador del sistema eléctrico), recopilamos toda la información relativa a **demanda, generación, intercambios y balance** energéticos desde el año 2010 hasta el presente. 
+
+                La app se distribuye en 3 pestañas:
+
+                1. **EDA**
+                    
+                    En esta pestaña podrás encontrar visualizaciones y datos sobre la **demanda**, **generacion**, **balance** e **intercambios** energéticos.
+
+                    Además, también podrás consultar **predicciones de demanda** con 3 modelos de Machine Learning diferentes!
+
+                2. **ML**
+
+                    En esta pestaña se detalla cada uno de los 3 modelos de Machine Learning usados para las predicciones de demanda.
+
+                3. **ABOUT US**
+                    
+                    Para que nos conozcas un poco más...
+
+                    """)
+
     with tab2:
 
         df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
             
         menu = ['Serie Temporal Demanda', 'Mapa de Intercambios', 'Comparación Anual', 'Generación por tecnología']
 
-        choice = st.selectbox(label='Menu', options=menu, index=0)
+        choice = st.selectbox(label='Menu', options=menu, index=None, placeholder="Seleccione datos a visualizar")
 
         if choice == 'Serie Temporal Demanda':
-            vis_demanda(df_demanda)
+            vis_gru(df_demanda)
 
         elif choice == 'Mapa de Intercambios':
             vis_intercambios(df_intercambios)
@@ -54,7 +80,7 @@ def main():
             pass
     
     with tab3:
-        
+        st.header("En construcción...")
         menu = ['Deep Learning', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
         choice = st.selectbox(label='Modelos de predicción de demanda', options=menu, index=None, placeholder="Seleccione modelo ML")
@@ -63,13 +89,55 @@ def main():
             st.header("En construcción...")
 
         elif choice == 'Gated Recurrent Unit (GRU)':
-            vis_gru(df_demanda)
+            st.header("GRU RNN")
+            try:
+                df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
+                st.header("Métricas obtenidas")
+                st.dataframe(df_metricas)                
+            except FileNotFoundError:
+                st.error("No se ha encontrado ningún archivo relativo a la RNN GRU en el sistema, por favor ejecute la pestaña EDA")
 
+            try:
+                st.header("Representación LOSS-MAE")
+                st.image("../ML/MODELS/GRU/GRU_MAE.png")
+            except Exception:
+                st.error("No se ha encontrado ningún archivo relativo a LOSS-MAE en el sistema, por favor ejecute la pestaña EDA")
+            
         elif choice == 'Facebook Propeth':
             st.header("En construcción...")
         
         else:
             pass
-        
+    
+    with tab4:
+        st.markdown("### :zap: ¿Quiénes formamos parte de este proyecto? :zap:")
+
+        st.markdown("#### **Álvaro Mejía**:")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("rellenar info")
+        with col2:
+            st.markdown("insertar foto")
+        st.markdown("---")
+
+        st.markdown("#### **Ignacio Barba**:")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("rellenar info")
+        with col2:
+            st.markdown("insertar foto")
+        st.markdown("---")
+
+        st.markdown("#### **Javier Corrales**:")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""Optometrista con más de 15 años de experiencia y apasionado por la formación continua, me he embarcado en este proyecto para poder especializar mi perfil en el sector.
+                    [¡Sígueme en LinkedIn!](https://www.linkedin.com/in/javiercorralesfdez/)
+                    """)
+        with col2:
+            img_javi = Image.open("imagenes/jcf.jpg")
+            st.image(img_javi, width=100)
+
+      
 if __name__ == '__main__':
     main()
