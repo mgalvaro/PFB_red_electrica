@@ -76,7 +76,7 @@ def grafica_loss_mae(historial) -> None:
     return None
 
 # Función para predecir 1-step   
-def predice_1step(model, data, scaler, len_secuencia, num_dias) -> np.array:  # len_secuencia (T), num_dias a futuro solo para multistep
+def predice_1step(model, data, scaler, len_secuencia, num_dias) -> np.array:  
     validation_predictions = []
     
     i = -num_dias
@@ -85,11 +85,9 @@ def predice_1step(model, data, scaler, len_secuencia, num_dias) -> np.array:  # 
         validation_predictions.append(p)
         i += 1
 
-    # Crear arrays para revertir el escalado
+    # Desescalado
     dummy_features = np.zeros((len(validation_predictions), 1))
     predictions_with_dummy = np.hstack([np.array(validation_predictions).reshape(-1, 1), dummy_features])
-
-    # Desescalar
     predictions_desescalado = scaler.inverse_transform(predictions_with_dummy)[:, 0]
 
     return predictions_desescalado
@@ -102,10 +100,10 @@ def predice_multistep(model, data, scaler, len_secuencia, num_dias) -> np.array:
     for _ in range(num_dias):
         pred = model.predict(input_seq)[0, 0]
         predictions.append(pred)
-        input_seq = np.roll(input_seq, shift=-1, axis=1)  # Desplazar la secuencia
-        input_seq[0, -1, -1] = pred  # Actualizar con la prediccióntest_data, 
+        input_seq = np.roll(input_seq, shift=-1, axis=1)  
+        input_seq[0, -1, -1] = pred  
     
-    # Desescalar
+    # Desescalado
     dummy_features = np.zeros((len(predictions), 1))
     predictions_with_dummy = np.hstack([np.array(predictions).reshape(-1, 1), dummy_features])
     predictions_desescalado = scaler.inverse_transform(predictions_with_dummy)[:, 0]
@@ -125,13 +123,11 @@ def muestra_metricas(dataframe, len_seq, preds) -> pd.DataFrame:
 def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
     
     real = real[(real['zona'] == 'nacional')]
-    #real['fecha'] = pd.to_datetime(real['fecha'], format='%Y-%m-%d')
-    
+
     ultima_fecha = real['fecha'].iloc[-1]
 
     fechas_futuras = [(ultima_fecha + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(len(pred_multistep))]
 
-    #fechas_pasadas = real['fecha'].dt.strftime("%Y-%m-%d").tolist()
     fechas_pasadas = [fecha.strftime("%Y-%m-%d") for fecha in real['fecha']]
 
     pred_1step = np.concatenate([[real['valor_(GWh)'].iloc[-1]], pred_1step])
@@ -179,7 +175,7 @@ def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
         template="plotly_white",
         hovermode="x",
         xaxis=dict(
-            tickformat="%Y-%m-%d",  # Formato de las fechas
+            tickformat="%Y-%m-%d", 
             tickangle=-45,
             tickmode='array'
         )
@@ -300,9 +296,6 @@ def vis_gru(dataframe) -> None:
             "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
             "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
             }
-            
-            df_metricas = pd.DataFrame(metricas)
-            #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
         
         elif modelo_input == 'Facebook Propeth':
             st.markdown("#### En construcción...")
