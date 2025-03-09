@@ -111,9 +111,9 @@ def predice_multistep(model, data, scaler, num_dias, len_secuencia=30) -> np.arr
 
     return predictions_desescalado
 
-def muestra_metricas(dataframe, len_seq, preds) -> pd.DataFrame:
+def muestra_metricas(dataframe, preds, len_secuencia=30) -> pd.DataFrame:
 
-    df_validacion = dataframe[dataframe["zona"] == "nacional"][-len_seq:]["valor_(MWh)"]*0.001
+    df_validacion = dataframe[dataframe["zona"] == "nacional"][-len_secuencia:]["valor_(MWh)"]*0.001
     dict_metricas = {
         "r2" : r2_score(df_validacion, preds),
         "mae_GWh" : mean_absolute_error(df_validacion, preds),
