@@ -119,7 +119,7 @@ def main():
 
             with st.expander("Representación LOSS-MSE en entrenamientos previos"):
                 st.markdown("#### Función de pérdida-mse prediciendo")
-                st.image("../ML/MODELS/GRU/Grafico LOSS_MAE_7.png")
+                st.image("../ML/MODELS/GRU/GRU_MAE.png")
 
             
         elif choice == 'Facebook Propeth':
