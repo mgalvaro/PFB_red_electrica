@@ -252,7 +252,7 @@ def vis_gru(dataframe) -> None:
         X, y = crea_secuencias(df, TARGET.name, ventana_seleccionada)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-        redimensiona(X_train, X_test, ventana_seleccionada, n_features)
+        #redimensiona(X_train, X_test, ventana_seleccionada, n_features)
 
         menu_modelos = ['Recurrent Neural Network (RRN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
