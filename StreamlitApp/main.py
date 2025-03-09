@@ -81,7 +81,7 @@ def main():
             pass
     
     with tab3:
-        st.header("En construcción...")
+
         menu = ['Recurrent Neural Network (RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
         choice = st.selectbox(label='Modelos de predicción de demanda', options=menu, index=None, placeholder="Seleccione modelo ML")
@@ -118,7 +118,7 @@ def main():
                 st.dataframe(df_metricas)                
 
             with st.expander("Representación LOSS-MSE en entrenamientos previos"):
-                st.markdown("#### Función de pérdida-mse prediciendo")
+                st.markdown("#### Función de pérdida-mse")
                 st.image("../ML/MODELS/GRU/GRU_MAE.png")
 
             
