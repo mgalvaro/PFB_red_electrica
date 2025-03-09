@@ -18,10 +18,10 @@ from StreamlitApp.functions.carga_dataframes import *
 from StreamlitApp.passwords import pw
 from ML.escalado_datos import *
 
-from keras.layers import Input, SimpleRNN, Dense, Dropout, LSTM, GlobalMaxPool1D
-from keras.models import Sequential
-from keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
+from keras.layers import Input, SimpleRNN, Dense, Dropout, LSTM, GlobalMaxPool1D # type: ignore
+from keras.models import Sequential # type: ignore
+from keras.optimizers import Adam # type: ignore
+from tensorflow.keras.callbacks import EarlyStopping # type: ignore
 
 with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br") as file:
     scaler = pkl.load(file)
