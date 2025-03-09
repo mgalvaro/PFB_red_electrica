@@ -43,31 +43,38 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
         year1 = years_to_compare[0]
         year2 = years_to_compare[1]
 
+        # parámetros necesarios para graficar ya que el df de intercambios no se procesa igual por la columna 'tipo'
         ldash = None
+        x_var = 'año'
+        filtro_groupby = ['fecha_sin_year', 'año']
 
         if variables[variable] == 1:
-            df = filtro_comparador((df_demanda[df_demanda['zona'] == 'nacional']), year1, year2)
+            df, df_stats = filtro_comparador((df_demanda[df_demanda['zona'] == 'nacional']), year1, year2)
 
         elif variables[variable] == 2:
             df1 = df_demanda
             df2 = df_generacion
-            df = calculo_balance(df1, df2, year1, year2)  # saca una tupla de dos df
+            df, df_stats = calculo_balance(df1, df2, year1, year2)  # saca una tupla de dos df
 
         elif variables[variable] == 3:
-            df = filtro_comparador(df_generacion[df_generacion['zona'] == 'nacional'], year1, year2)
+            df, df_stats = filtro_comparador(df_generacion[df_generacion['zona'] == 'nacional'], year1, year2)
 
         else:
-            df = filtro_intercambios(df_intercambios, year1, year2)
+            df, df_stats = filtro_intercambios(df_intercambios, year1, year2)
             ldash='tipo'
+            x_var = 'tipo'
+            filtro_groupby = ['fecha_sin_year', 'año', 'tipo']
 
-        # with st.expander(label = f"DataFrame Filtrado:", expanded = False):
-        #     st.dataframe(df[0])
 
-        df[0]['fecha_sin_year'] = pd.to_datetime(df[0]['fecha_sin_year'])
-        df[0]['fecha_sin_year'] = df[0]['fecha_sin_year'].dt.to_period('W')
-        df_0 = df[0].groupby(['fecha_sin_year', 'año']).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
+        df['fecha_sin_year'] = pd.to_datetime(df['fecha_sin_year'])
+        df['fecha_sin_year'] = df['fecha_sin_year'].dt.to_period('W')
+
+        df_0 = df.groupby(filtro_groupby).agg({'valor_(GWh)': 'mean'}).reset_index(drop=False)
         df_0['fecha_sin_year'] = df_0['fecha_sin_year'].astype(str)
         df_0['fecha_sin_year'] = df_0['fecha_sin_year'].apply(lambda x : x[:10])
+
+        with st.expander(label = "Dataset de Intercambios Filtrado", expanded = False):
+            st.dataframe(df_0) 
 
 
         fig = px.line(
@@ -85,19 +92,11 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
 
         st.plotly_chart(fig)
 
-        st.table(df[1])
+        st.table(df_stats)
 
-        # if variables[variable] != 4:
-        #     df_stats = df[1].melt(id_vars=['año'], var_name='Métrica', value_name='Valor')
-        #     fc = None
-        # else:
-        #     df_stats = df[1].melt(id_vars=['año', 'tipo'], var_name='Métrica', value_name='Valor')
-        #     fc='tipo'
-        with st.expander(label = f"DataFrame Filtrado:", expanded = False):
-                st.dataframe(df[0])
 
-        fig_stats = px.box(data_frame=df[0],
-                           x='año',
+        fig_stats = px.box(data_frame=df,
+                           x=x_var,
                            y='valor_(GWh)',
                            color='año',
                             # facet_col=fc, 

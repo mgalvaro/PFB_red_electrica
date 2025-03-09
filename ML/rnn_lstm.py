@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath("../"))
 
 import plotly.express as px
 
-from encoding import encoder
+from ML.encoding import encoder
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_error, r2_score
@@ -29,7 +29,7 @@ with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br"
 #---------------------------------------------------------------------------------------------------------
 # sequencias para predecir y train_test
 
-def create_sequences(df, target_column, lookback=60):
+def create_sequences_rnn(df, target_column, lookback=60):
     X, y = [], []
     for i in range(len(df) - lookback):
         X.append(df.iloc[i:i+lookback].drop(columns=[target_column]).to_numpy()) 
@@ -74,7 +74,7 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=60, epochs=100, lr
                              verbose=1
                              )
     
-    joblib.dump(model_rnn, 'rnn.pkl')
+    joblib.dump(model_rnn, 'MODELS/RNN_LSTM/rnn.pkl')
     print("Modelo guardado")
 
     return model_rnn, history
@@ -96,11 +96,7 @@ def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=60, epochs=100, l
         Dense(1) 
     ])
 
-    # Compilar el modelo
     model_lstm.compile(optimizer=Adam(learning_rate=lr), loss=loss, metrics=metrics)
-
-    # Mostrar resumen del modelo
-    # model_lstm.summary()
 
     history = model_lstm.fit(x = X_train, 
                              y = y_train, 
@@ -109,7 +105,7 @@ def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=60, epochs=100, l
                              verbose=1
                              )
     
-    joblib.dump(model_lstm, 'lstm.pkl')
+    joblib.dump(model_lstm, 'MODELS/RNN_LSTM/lstm.pkl')
     print("Modelo guardado")
 
     return model_lstm, history
@@ -159,7 +155,7 @@ def desescalado(val_target, val_pred, scaler):
 
 # Funciones para predecir
 
-def predict_1step(X, y_val, model, scaler):
+def predict_1step_rnn(X, y_val, model, scaler):
 
     validation_target = y_val
     validation_predictions = []
@@ -179,7 +175,7 @@ def predict_1step(X, y_val, model, scaler):
     return pred_real, target_real
 
 
-def predict_multi(X, X_val, y_val, model, scaler):
+def predict_multi_rnn(X, X_val, y_val, model, scaler):
 
     validation_target_multi = y_val
     validation_predictions_multi = []
@@ -201,6 +197,32 @@ def predict_multi(X, X_val, y_val, model, scaler):
     pred_real_multi, target_real_multi = desescalado(validation_target_multi, validation_predictions_multi, scaler)
 
     return pred_real_multi, target_real_multi
+
+
+def predict_noise_rnn(X, X_val, y_val, model, scaler, sigma=0.05):
+
+    validation_target_noise = y_val  # Última parte de los datos reales
+    validation_predictions_noise = []
+
+    # Usar la primera ventana de validación
+    last_x = X_val[0].copy()
+
+    for i in range(len(validation_target_noise)):  
+        # Predicción sin ruido
+        p = model.predict(last_x.reshape(1, last_x.shape[0], X_val.shape[2]))[0, 0]
+        
+        # Agregar ruido gaussiano proporcional
+        noise = np.random.normal(loc=0, scale=sigma * abs(p), size=1)[0]  # Proporcional al valor predicho
+        p_noisy = p + noise
+        
+        validation_predictions_noise.append(p_noisy)
+        # print(f"Paso {i+1} -> Valor real: {validation_real_noise[i]:.4f} | Predicción con ruido: {p_noisy:.4f}")
+
+        # Desplazar la ventana y actualizar el último valor con la predicción ruidosa
+        last_x[:-1] = last_x[1:]  # Mueve los datos hacia atrás
+        last_x[-1, 0] = p_noisy  # Inserta la predicción con ruido como último valor
+
+        pred_real_noise, target_real_noise = desescalado(validation_target_noise, validation_predictions_noise, scaler)
 
 #-----------------------------------------------------------------------------------------
 
@@ -224,7 +246,7 @@ def plot_validation(validation_target, validation_predictions):
     return fig_pred
 
 
-def metricas(validation_target, validation_predictions):
+def metricas_rnn(validation_target, validation_predictions):
 
     mse = round(mean_squared_error(validation_target, validation_predictions),2)
     # print(f"MSE: {mse}")
@@ -237,7 +259,13 @@ def metricas(validation_target, validation_predictions):
 
     r2 = round(r2_score(validation_target, validation_predictions), 2)
 
-    return mse, mae, rmse, r2
+    dict_metricas = {
+        "r2" : [r2],
+        "mae_GWh" : [mae],
+        "rmse_GWh" : [rmse]
+    }
+
+    return dict_metricas
 
 
 def plot_predictions(validation_target, validation_predictions):
@@ -282,7 +310,7 @@ def plot_n_future(predictions):
 #-----------------------------------------------------------------------------------------
 # predicciones 1 paso y multistep para n_future días
 
-def prediction_1step(X, y_val, scaler, model, n_future):
+def prediction_1step_rnn(X, y_val, scaler, model, n_future):
 
     predictions = model.predict(X[-n_future:])
 
@@ -293,7 +321,7 @@ def prediction_1step(X, y_val, scaler, model, n_future):
     return predictions_real_one
 
 
-def prediction_multistep(X, y_val, scaler, model, n_future):
+def prediction_multistep_rnn(X, y_val, scaler, model, n_future):
 
     multi_real = y_val[-n_future:]  # Últimos valores reales para comparación
     predictions = []

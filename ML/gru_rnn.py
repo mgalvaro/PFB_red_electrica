@@ -15,6 +15,7 @@ from StreamlitApp.functions.carga_dataframes import *
 from StreamlitApp.vis_demanda import *
 from ML.escalado_datos import *
 from StreamlitApp.passwords import pw
+from ML.rnn_lstm import *
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
@@ -260,29 +261,53 @@ def vis_gru(dataframe) -> None:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
         redimensiona(X_train, X_test, ventana_seleccionada, n_features)
 
-        menu_modelos = ['Deep Learning', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
+        menu_modelos = ['Recurrent Neural Network (RRN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
         modelo_input = st.selectbox(label="Seleccione modelo de predicción",
                      options = menu_modelos,
                      placeholder="Seleccione Modelo ML",
                      index=None)
         
-        if modelo_input == 'Deep Learning':
-            st.markdown("#### En construcción...")
+        fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+        
+        if modelo_input == 'Recurrent Neural Network (RRN)':
+            
+            with open(f"../ML/MODELS/RNN_LSTM/rnn.pkl", "br") as file:
+                    rnn = pkl.load(file)
+
+            pred_1step = prediction_1step_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
+            pred_multistep = prediction_multistep_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
+
+            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
+
+        elif modelo_input == 'Long Short-Term Memory (LSTM)':
+
+            with open(f"../ML/MODELS/RNN_LSTM/lstm.pkl", "br") as file:
+                    rnn = pkl.load(file)
+
+            pred_1step = prediction_1step_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
+            pred_multistep = prediction_multistep_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
+
+            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
+
 
         elif modelo_input == 'Gated Recurrent Unit (GRU)':
    
             with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
-                    gru_model = pickle.load(file)
+                    gru_model = pkl.load(file)
     
-            fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
             pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
             pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-            metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
-            metricas_multistep = muestra_metricas(dataframe, ventana_seleccionada, pred_multistep)
+            # metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
+            # metricas_multistep = muestra_metricas(dataframe, ventana_seleccionada, pred_multistep)
             st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
 
-            st.header("Predicciones")
+        elif modelo_input == 'Facebook Propeth':
+            st.markdown("#### En construcción...")
+
+        st.header("Predicciones")
+
+        if modelo_input !=None:
             with st.expander(label = f"Predicciones 1-Step", expanded = False):
                 pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
                 pred_1step["Fecha"] = fechas
@@ -293,18 +318,17 @@ def vis_gru(dataframe) -> None:
                 pred_multistep["Fecha"] = fechas
                 st.dataframe(pred_multistep)
         
-            metricas = {
-            "modelo" : f"GRUmodel{ventana_seleccionada}",
-            "prediccion": ["1-step", "multi-step"],
-            "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
-            "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
-            "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
-            }
+            # metricas = {
+            # "modelo" : f"{modelo_input}_{ventana_seleccionada}",
+            # "prediccion": ["1-step", "multi-step"],
+            # "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
+            # "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
+            # "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
+            # }
             
-            df_metricas = pd.DataFrame(metricas)
+            # df_metricas = pd.DataFrame(metricas)
             #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
         
-        elif modelo_input == 'Facebook Propeth':
-            st.markdown("#### En construcción...")
+        
 
     return None
