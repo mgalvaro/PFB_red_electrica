@@ -292,10 +292,6 @@ def vis_gru(dataframe) -> None:
             with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
                     gru_model = pkl.load(file)
     
-<<<<<<< HEAD
-=======
-            fechas = [(dataframe["fecha"].max() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
->>>>>>> a195b3661eb4e6a84297696bca89308bc0f3e0d1
             pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
             pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
             # metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
@@ -318,7 +314,6 @@ def vis_gru(dataframe) -> None:
                 pred_multistep["Fecha"] = fechas
                 st.dataframe(pred_multistep)
         
-<<<<<<< HEAD
             # metricas = {
             # "modelo" : f"{modelo_input}_{ventana_seleccionada}",
             # "prediccion": ["1-step", "multi-step"],
@@ -329,15 +324,6 @@ def vis_gru(dataframe) -> None:
             
             # df_metricas = pd.DataFrame(metricas)
             #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
-=======
-            metricas = {
-            "modelo" : f"GRUmodel{ventana_seleccionada}",
-            "prediccion": ["1-step", "multi-step"],
-            "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
-            "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
-            "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
-            }
->>>>>>> a195b3661eb4e6a84297696bca89308bc0f3e0d1
         
         
 
