@@ -286,7 +286,7 @@ def vis_gru(dataframe) -> None:
 
         elif modelo_input == 'Gated Recurrent Unit (GRU)':
    
-            with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
+            with open(f"../ML/MODELS/GRU/gru_model.pkl", "br") as file:
                     gru_model = pkl.load(file)
     
             pred_1step = predice_1step(gru_model, X_test, scaler, num_dias=ventana_seleccionada)
