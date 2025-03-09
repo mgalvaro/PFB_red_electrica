@@ -16,6 +16,7 @@ from StreamlitApp.vis_demanda import *
 from ML.escalado_datos import *
 from StreamlitApp.passwords import pw
 from ML.rnn_lstm import *
+from ML.prophet import *
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
@@ -295,7 +296,17 @@ def vis_gru(dataframe) -> None:
             st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
 
         elif modelo_input == 'Facebook Propeth':
-            st.markdown("#### En construcción...")
+            with open(f"../ML/MODELS/PROPHET/modelo_prophet_con.pkl", "br") as file: 
+                prophet_model = pkl.load(file)
+            prophet_model = prophet_model["modelo"]
+
+            pred_1step = predice_prophet(prophet_model, dataframe)
+            pred_1step = pred_1step.rename(columns={"ds":"fecha", "yhat":"valor_(GWh)"})
+            pred_1step = pred_1step["valor_(GWh)"][:ventana_seleccionada]
+
+            pred_multistep = pred_1step.copy()
+  
+            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
 
         st.header("Predicciones")
 
