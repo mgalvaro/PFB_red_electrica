@@ -295,7 +295,7 @@ def vis_gru(dataframe) -> None:
 
             st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
 
-        elif modelo_input == 'Facebook Propeth':
+        elif modelo_input == 'Facebook Prophet':
             with open(f"../ML/MODELS/PROPHET/modelo_prophet_con.pkl", "br") as file: 
                 prophet_model = pkl.load(file)
             prophet_model = prophet_model["modelo"]
