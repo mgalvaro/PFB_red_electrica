@@ -29,7 +29,7 @@ with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br"
 #---------------------------------------------------------------------------------------------------------
 # sequencias para predecir y train_test
 
-def create_sequences_rnn(df, target_column, lookback=60):
+def create_sequences_rnn(df, target_column, lookback=30):
     X, y = [], []
     for i in range(len(df) - lookback):
         X.append(df.iloc[i:i+lookback].drop(columns=[target_column]).to_numpy()) 
@@ -74,7 +74,7 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr
                              verbose=1
                              )
     
-    joblib.dump(model_rnn, 'MODELS/RNN_LSTM/rnn.pkl')
+    joblib.dump(model_rnn, 'MODELS/RNN_LSTM/rnn_new.pkl')
     print("Modelo guardado")
 
     return model_rnn, history
@@ -105,7 +105,7 @@ def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, l
                              verbose=1
                              )
     
-    joblib.dump(model_lstm, 'MODELS/RNN_LSTM/lstm.pkl')
+    joblib.dump(model_lstm, 'MODELS/RNN_LSTM/lstm_new.pkl')
     print("Modelo guardado")
 
     return model_lstm, history
@@ -120,7 +120,7 @@ def plot_mae(history):
         )
 
     fig.update_layout(
-        title_x=0.5,
+        title_x=0,
         legend_title_text="Variables"
     )
 
@@ -246,7 +246,7 @@ def plot_validation(validation_target, validation_predictions):
     return fig_pred
 
 
-def metricas_rnn(validation_target, validation_predictions):
+def metricas_rnn_lstm(validation_target, validation_predictions):
 
     mse = round(mean_squared_error(validation_target, validation_predictions),2)
     # print(f"MSE: {mse}")

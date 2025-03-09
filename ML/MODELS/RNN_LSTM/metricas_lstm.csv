@@ -1,0 +1,3 @@
+,r2,mae_GWh,rmse_GWh,modelo,prediccion
+0,0.27,31.74,40.78,LSTM,1-step
+0,-176.48,73.19,88.23,LSTM,multi-step
