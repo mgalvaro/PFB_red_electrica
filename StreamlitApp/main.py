@@ -166,7 +166,27 @@ def main():
 
             
         elif choice == 'Facebook Propeth':
-            st.header("En construcción...")
+
+            with st.expander("Métricas obtenidas"):
+                df_metricas = pd.read_csv("../ML/MODELS/PROPHET/evaluacion_modelo_train.csv")
+                st.dataframe(df_metricas)      
+
+                df_metricas_comparadas = pd.read_csv("../ML/MODELS/PROPHET/predicciones_comparacion_prophet.csv")
+                st.dataframe(df_metricas_comparadas)
+                
+
+            with st.expander("Representación de las diferentes granularidades del modelo Prophet"):
+                st.markdown("##### Día a día")
+                st.image("../ML/MODELS/PROPHET/prophet_vis_Día a día.png")
+
+                st.markdown("##### Mes a mes")
+                st.image("../ML/MODELS/PROPHET/prophet_vis_Mes a mes.png")
+
+                st.markdown("##### Semana a semana")
+                st.image("../ML/MODELS/PROPHET/prophet_vis_Semana a semana.png")
+
+                st.markdown("##### Trimestre a trimestre")
+                st.image("../ML/MODELS/PROPHET/prophet_vis_Trimestre a trimestre.png")
         
         else:
             pass
