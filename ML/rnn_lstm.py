@@ -49,7 +49,7 @@ def train_test(X, y, f=0.8):
 #---------------------------------------------------------------------------------------------------------
 # modelos de RNN y LSTM
 
-def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=60, epochs=100, lr=0.001, loss="mse", metrics=["mae"]):
+def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"]):
 
     model_rnn = Sequential([
         Input(shape = (lookback, X.shape[2])),
@@ -80,7 +80,7 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=60, epochs=100, lr
     return model_rnn, history
 
 
-def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=60, epochs=100, lr=0.001, loss="mse", metrics=["mae"]):
+def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"]):
 
     model_lstm = Sequential([
         Input(shape=(lookback, X.shape[2])),  

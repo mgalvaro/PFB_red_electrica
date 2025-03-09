@@ -81,44 +81,43 @@ def main():
             pass
     
     with tab3:
-
-        menu = ['Deep Learning', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
+        st.header("En construcción...")
+        menu = ['Recurrent Neural Network (RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
         choice = st.selectbox(label='Modelos de predicción de demanda', options=menu, index=None, placeholder="Seleccione modelo ML")
 
-        if choice == 'Deep Learning':
-            st.header("En construcción...")
+        if choice == 'Recurrent Neural Network (RNN)':
+            st.header("Recurrent Neural Network (RNN)")
+            try:
+                df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasRNN.csv")
+                st.header("Métricas obtenidas")
+                st.dataframe(df_metricas)                
+            except FileNotFoundError:
+                st.error("No se ha encontrado ningún archivo relativo a la RNN GRU en el sistema, por favor ejecute la pestaña EDA")
 
-        elif choice == 'Gated Recurrent Unit (GRU)': 
+        elif choice == 'Long Short-Term Memory (LSTM)':
+            st.header("Long Short-Term Memory (LSTM)")
+            try:
+                df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
+                st.header("Métricas obtenidas")
+                st.dataframe(df_metricas)                
+            except FileNotFoundError:
+                st.error("No se ha encontrado ningún archivo relativo a la RNN GRU en el sistema, por favor ejecute la pestaña EDA")
+
+        elif choice == 'Gated Recurrent Unit (GRU)':
             st.header("GRU RNN")
+            try:
+                df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
+                st.header("Métricas obtenidas")
+                st.dataframe(df_metricas)                
+            except FileNotFoundError:
+                st.error("No se ha encontrado ningún archivo relativo a la RNN GRU en el sistema, por favor ejecute la pestaña EDA")
 
-            st.markdown("""
-                        Una red neuronal es un modelo de computación inspirado en cómo funciona el cerebro humano. Está formada por capas de "neuronas" o unidades que procesan la información, ayudando a resolver tareas como el reconocimiento de imágenes o el análisis de texto. 
-
-                        Una red neuronal recurrente es un tipo especial de red donde las conexiones entre las neuronas pueden formar ciclos, lo que permite que la red "recuerde" información de lo que ocurrió antes y la utilice para tomar decisiones en el futuro. Esto es útil para tareas como la traducción automática o la predicción de series temporales, ya que la información anterior tiene importancia. 
-
-                        Las redes GRU (Gated Recurrent Unit) son un tipo de red neuronal recurrente que utiliza un mecanismo para controlar mejor cómo se "recuerda" o "olvida" la información. Se diferencian de otras redes recurrentes, como las LSTM, porque son más simples y requieren menos recursos computacionales, manteniendo un rendimiento similar en muchas aplicaciones.
-                        """)
-            with st.expander("Métricas obtenidas"):
-                try:
-                    df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
-                    st.dataframe(df_metricas)                
-                except FileNotFoundError:
-                    st.error("No se ha encontrado ningún archivo relativo a la RNN GRU en el sistema, por favor ejecute la pestaña EDA")
-
-            with st.expander("Representación LOSS-MSE en entrenamientos previos"):
-                try:
-
-                    st.markdown("#### Función de pérdida-mse prediciendo 7 días")
-                    st.image("../ML/MODELS/GRU/Grafico LOSS_MAE_7.png")
-
-                    st.markdown("#### Función de pérdida-mse prediciendo 15 días")
-                    st.image("../ML/MODELS/GRU/Grafico LOSS_MAE_15.png")
-
-                    st.markdown("#### Función de pérdida-mse prediciendo 30 días")
-                    st.image("../ML/MODELS/GRU/Grafico LOSS_MAE_30.png")
-                except FileNotFoundError:
-                    st.error("No se ha encontrado ningún archivo relativo a LOSS-MAE en el sistema, por favor ejecute la pestaña EDA")
+            try:
+                st.header("Representación LOSS-MAE")
+                st.image("../ML/MODELS/GRU/GRU_MAE.png")
+            except Exception:
+                st.error("No se ha encontrado ningún archivo relativo a LOSS-MAE en el sistema, por favor ejecute la pestaña EDA")
             
         elif choice == 'Facebook Propeth':
             st.header("En construcción...")
