@@ -264,7 +264,7 @@ def vis_gru(dataframe) -> None:
                      placeholder="Seleccione Modelo ML",
                      index=None)
         
-        fechas = [(datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
+        fechas = [(dataframe["fecha"].max() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
         
         if modelo_input == 'Recurrent Neural Network (RRN)':
             
