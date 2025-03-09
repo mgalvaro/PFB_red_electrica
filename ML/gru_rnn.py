@@ -55,7 +55,7 @@ def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple:
     #history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=100, verbose=0, callbacks=[early_stopping])  2500 epochs sin early probar
     history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=250, verbose=0)
     
-    with open(f"MODELS/GRU/gru_model{len_secuencia}.pkl", "bw") as file:
+    with open(f"MODELS/GRU/gru_model.pkl", "bw") as file:
         pickle.dump(model,file)
         return model, history
 
@@ -77,7 +77,7 @@ def grafica_loss_mae(historial) -> None:
     return None
 
 # Función para predecir 1-step   
-def predice_1step(model, data, scaler, len_secuencia, num_dias) -> np.array:  
+def predice_1step(model, data, scaler, num_dias, len_secuencia=30) -> np.array:  
     validation_predictions = []
     
     i = -num_dias
@@ -94,7 +94,7 @@ def predice_1step(model, data, scaler, len_secuencia, num_dias) -> np.array:
     return predictions_desescalado
 
 # Función para predecir multi-step
-def predice_multistep(model, data, scaler, len_secuencia, num_dias) -> np.array:
+def predice_multistep(model, data, scaler, num_dias, len_secuencia=30) -> np.array:
     predictions = []
     input_seq = data[-1].reshape(1, len_secuencia, data.shape[2])
     
@@ -184,9 +184,6 @@ def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
     return fig
 
 def vis_gru(dataframe) -> None:
-
-    metricas_1step = {"r2":None, "mae_GWh":None, "rmse_GWh":None}
-    metricas_multistep = {"r2":None, "mae_GWh":None, "rmse_GWh":None}
 
     df_filtrado, periodo = vis_demanda(dataframe)
 
@@ -292,10 +289,9 @@ def vis_gru(dataframe) -> None:
             with open(f"../ML/MODELS/GRU/gru_model{ventana_seleccionada}.pkl", "br") as file:
                     gru_model = pkl.load(file)
     
-            pred_1step = predice_1step(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-            pred_multistep = predice_multistep(gru_model, X_test, scaler, ventana_seleccionada, num_dias=ventana_seleccionada)
-            # metricas_1step = muestra_metricas(dataframe, ventana_seleccionada, pred_1step)
-            # metricas_multistep = muestra_metricas(dataframe, ventana_seleccionada, pred_multistep)
+            pred_1step = predice_1step(gru_model, X_test, scaler, num_dias=ventana_seleccionada)
+            pred_multistep = predice_multistep(gru_model, X_test, scaler, num_dias=ventana_seleccionada)
+
             st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
 
         elif modelo_input == 'Facebook Propeth':
@@ -313,18 +309,5 @@ def vis_gru(dataframe) -> None:
                 pred_multistep = pd.DataFrame({"valor_(GWh)":pred_multistep})
                 pred_multistep["Fecha"] = fechas
                 st.dataframe(pred_multistep)
-        
-            # metricas = {
-            # "modelo" : f"{modelo_input}_{ventana_seleccionada}",
-            # "prediccion": ["1-step", "multi-step"],
-            # "r2": [metricas_1step["r2"], metricas_multistep["r2"]],
-            # "mae_GWh": [metricas_1step["mae_GWh"], metricas_multistep["mae_GWh"]],
-            # "rmse_GWh": [metricas_1step["rmse_GWh"], metricas_multistep["rmse_GWh"]]
-            # }
-            
-            # df_metricas = pd.DataFrame(metricas)
-            #df_metricas.to_csv("../ML/MODELS/GRU/MetricasGRU.csv", index=False) REVISAR ESCRITURA METRICAS
-        
-        
 
     return None
