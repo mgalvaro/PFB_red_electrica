@@ -28,7 +28,7 @@ with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br"
     scaler = pkl.load(file)
 
 # Función para crear secuencias
-def crea_secuencias(dataframe, target_col, len_secuencia) -> tuple:
+def crea_secuencias(dataframe, target_col, len_secuencia=30) -> tuple:
     X, y = [], []
     for i in range(len(dataframe) - len_secuencia):
         X.append(dataframe.iloc[i:i+len_secuencia].drop(columns=[target_col]).values) 
@@ -249,7 +249,7 @@ def vis_gru(dataframe) -> None:
         df = df.drop(columns="fecha")
         TARGET = df["valor_(GWh)"]
         n_features = len([col for col in df.columns if col != TARGET.name])
-        X, y = crea_secuencias(df, TARGET.name, ventana_seleccionada)
+        X, y = crea_secuencias(df, TARGET.name)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
         #redimensiona(X_train, X_test, ventana_seleccionada, n_features)
