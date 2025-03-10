@@ -166,6 +166,18 @@ def main():
 
             
         elif choice == 'Facebook Propeth':
+            st.markdown("""
+                        :brain: **Facebook Prophet** es un modelo de predicción de series temporales desarrollado por el equipo de investigación de Facebook. Está diseñado para predecir tendencias futuras utilizando un enfoque basado en regresión aditiva con componentes estacionales, lo que permite modelar patrones complejos de manera automática.  
+
+                        Prophet es especialmente útil para trabajar con datos que presentan tendencias no lineales, efectos estacionales y eventos especiales como festivos o cambios estructurales en la serie temporal.  
+
+                        Una de las principales ventajas de Prophet es su capacidad para manejar valores atípicos y datos faltantes sin necesidad de preprocesamiento exhaustivo, lo que lo convierte en una herramienta flexible y fácil de usar.  
+
+                        :large_green_circle: A diferencia de otros modelos tradicionales de series temporales, Prophet no requiere que el usuario ajuste manualmente los parámetros de tendencia o estacionalidad, ya que el modelo los aprende automáticamente a partir de los datos históricos.  
+
+                        :large_red_square: Sin embargo, Prophet puede no ser la mejor opción cuando se trata de datos con patrones altamente irregulares o cambios abruptos que no siguen una estructura definida, ya que su enfoque basado en tendencias suaves puede generar predicciones menos precisas en estos casos. 
+                         
+                         """)
 
             with st.expander("Métricas obtenidas"):
                 df_metricas = pd.read_csv("../ML/MODELS/PROPHET/evaluacion_modelo_train.csv")
@@ -211,8 +223,8 @@ def main():
         with col1:
             st.markdown("#### **Ignacio Barba**:")
             social_icons("josé-ignacio-barba-quezada-621975b0", "NachoMijo")
-            st.markdown("")
-            st.markdown("rellenar info")
+            st.markdown("Comunicador y comercial de profesión, aficionado al mundo tech.")
+            st.markdown("Explorando el mundo de la ciencia de datos como un reto.")
         with col2:
             img_nacho = Image.open("imagenes/ib.png")
             st.image(img_nacho, width=510)
