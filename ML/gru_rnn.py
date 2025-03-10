@@ -291,7 +291,7 @@ def vis_gru(dataframe) -> None:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
-        menu_modelos = ['Recurrent Neural Network (RRN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
+        menu_modelos = ['Recurrent Neural Network (RRN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
 
         modelo_input = st.selectbox(label="Seleccione modelo de predicción",
                      options = menu_modelos,
@@ -356,7 +356,7 @@ def vis_gru(dataframe) -> None:
                 pred_multistep["Fecha"] = fechas
                 st.dataframe(pred_multistep)
 
-        elif (modelo_input !=None) & (modelo_input == 'Facebook Propeth'):
+        elif (modelo_input !=None) & (modelo_input == 'Facebook Prophet'):
             with st.expander(label = f"Predicciones", expanded = False):
                 pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
                 pred_1step["Fecha"] = fechas
