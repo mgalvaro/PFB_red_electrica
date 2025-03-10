@@ -339,7 +339,6 @@ def vis_gru(dataframe) -> None:
             pred_1step = predice_prophet(prophet_model, dataframe)
             pred_1step = pred_1step.rename(columns={"ds":"fecha", "yhat":"valor_(GWh)"})
             pred_1step = pred_1step["valor_(GWh)"][:ventana_seleccionada]
-            st.write(pred_1step)
   
             st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step))
 
@@ -358,7 +357,6 @@ def vis_gru(dataframe) -> None:
 
         elif (modelo_input !=None) & (modelo_input == 'Facebook Prophet'):
             with st.expander(label = f"Predicciones", expanded = False):
-                pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
                 pred_1step["Fecha"] = fechas
                 st.dataframe(pred_1step)
 
