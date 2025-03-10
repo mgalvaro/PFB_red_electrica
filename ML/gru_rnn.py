@@ -357,6 +357,7 @@ def vis_gru(dataframe) -> None:
 
         elif (modelo_input !=None) & (modelo_input == 'Facebook Prophet'):
             with st.expander(label = f"Predicciones", expanded = False):
+                pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
                 pred_1step["Fecha"] = fechas
                 st.dataframe(pred_1step)
 
