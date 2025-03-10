@@ -45,11 +45,11 @@ def main():
                     
                     En esta pestaña podrás encontrar visualizaciones y datos sobre la **demanda**, **generacion**, **balance** e **intercambios** energéticos.
 
-                    Además, también podrás consultar **predicciones de demanda** con 3 modelos de Machine Learning diferentes!
+                    Además, también podrás consultar **predicciones de demanda** con varios modelos de Machine Learning diferentes.
 
                 2. **ML**
 
-                    En esta pestaña se detalla cada uno de los 3 modelos de Machine Learning usados para las predicciones de demanda.
+                    En esta pestaña se detalla cada uno de los modelos de Machine Learning usados para las predicciones de demanda.
 
                 3. **ABOUT US**
                     
@@ -134,9 +134,9 @@ def main():
                 fig_mae_lstm = plot_mae(history_lstm)
                 st.plotly_chart(fig_mae_lstm)
 
-                with st.expander("Representación LOSS-MSE en entrenamientos previos"):
-                    st.markdown("#### Función de pérdida-mse")
-                    st.image("../ML/MODELS/GRU/GRU_MAE.png") 
+                #with st.expander("Representación LOSS-MSE en entrenamientos previos"):
+                #    st.markdown("#### Función de pérdida-mse")
+                #    st.image("../ML/MODELS/GRU/GRU_MAE.png") 
 
             except FileNotFoundError:
                 st.error("No se ha encontrado ningún archivo relativo a la LSTM en el sistema, por favor ejecute la pestaña EDA")
