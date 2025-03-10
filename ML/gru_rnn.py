@@ -291,7 +291,7 @@ def vis_gru(dataframe) -> None:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
-        menu_modelos = ['Recurrent Neural Network (RRN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
+        menu_modelos = ['Recurrent Neural Network (RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
 
         modelo_input = st.selectbox(label="Seleccione modelo de predicción",
                      options = menu_modelos,
@@ -300,7 +300,7 @@ def vis_gru(dataframe) -> None:
         
         fechas = [(dataframe["fecha"].max() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
         
-        if modelo_input == 'Recurrent Neural Network (RRN)':
+        if modelo_input == 'Recurrent Neural Network (RNN)':
             
             with open(f"../ML/MODELS/RNN_LSTM/rnn.pkl", "br") as file:
                     rnn = pkl.load(file)
