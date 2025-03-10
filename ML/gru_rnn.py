@@ -122,67 +122,104 @@ def muestra_metricas(dataframe, ventana, preds) -> pd.DataFrame:
     }
     return dict_metricas
 
-def grafica_predicciones(real, pred_1step, pred_multistep) -> None:
+def grafica_predicciones(real, pred_1step, pred_multistep=None) -> go.Figure:
     
     real = real[(real['zona'] == 'nacional')]
-
     ultima_fecha = real['fecha'].iloc[-1]
-
-    fechas_futuras = [(ultima_fecha + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(len(pred_multistep))]
-
+    fechas_futuras = [(ultima_fecha + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(len(pred_1step))]
     fechas_pasadas = [fecha.strftime("%Y-%m-%d") for fecha in real['fecha']]
-
     pred_1step = np.concatenate([[real['valor_(GWh)'].iloc[-1]], pred_1step])
-    pred_multistep = np.concatenate([[real['valor_(GWh)'].iloc[-1]], pred_multistep])
-    
-    fig = go.Figure()
 
-    # Valores reales (pasado)
-    valores_pasado = real['valor_(GWh)']    
-    fig.add_trace(go.Scatter(
-        x=fechas_pasadas,
-        y=valores_pasado,
-        mode='lines',
-        name='Valores Reales (Pasado)',
-        line=dict(color='blue', width=2),
-        marker=dict(size=6)
-    ))
+    if pred_multistep is not None:
+        pred_multistep = np.concatenate([[real['valor_(GWh)'].iloc[-1]], pred_multistep])
+        
+        fig = go.Figure()
 
-    # Predicciones 1-step
-    fig.add_trace(go.Scatter(
-        x=fechas_futuras,
-        y=pred_1step,
-        mode='lines',
-        name='Predicciones 1-step',
-        line=dict(color='red', width=2, dash='dot'),
-        marker=dict(size=6)
-    ))
+        # Valores reales (pasado)
+        valores_pasado = real['valor_(GWh)']    
+        fig.add_trace(go.Scatter(
+            x=fechas_pasadas,
+            y=valores_pasado,
+            mode='lines',
+            name='Valores Reales (Pasado)',
+            line=dict(color='blue', width=2),
+            marker=dict(size=6)
+        ))
 
-    # Predicciones multi-step
-    fig.add_trace(go.Scatter(
-        x=fechas_futuras,
-        y=pred_multistep,
-        mode='lines',
-        name='Predicciones Multi-step',
-        line=dict(color='green', width=2, dash='dot'),
-        marker=dict(size=6)
-    ))
+        # Predicciones 1-step
+        fig.add_trace(go.Scatter(
+            x=fechas_futuras,
+            y=pred_1step,
+            mode='lines',
+            name='Predicciones 1-step',
+            line=dict(color='red', width=2, dash='dot'),
+            marker=dict(size=6)
+        ))
 
-    # Configuración de la gráfica
-    fig.update_layout(
-        title="Predicciones vs Valores Reales",
-        title_x=0.5,
-        xaxis_title="Fechas",
-        yaxis_title="Demanda (GWh)",
-        template="plotly_white",
-        hovermode="x",
-        xaxis=dict(
-            tickformat="%Y-%m-%d", 
-            tickangle=-45,
-            tickmode='array'
+        # Predicciones multi-step
+        fig.add_trace(go.Scatter(
+            x=fechas_futuras,
+            y=pred_multistep,
+            mode='lines',
+            name='Predicciones Multi-step',
+            line=dict(color='green', width=2, dash='dot'),
+            marker=dict(size=6)
+        ))
+
+        # Configuración de la gráfica
+        fig.update_layout(
+            title="Predicciones vs Valores Reales",
+            title_x=0.5,
+            xaxis_title="Fechas",
+            yaxis_title="Demanda (GWh)",
+            template="plotly_white",
+            hovermode="x",
+            xaxis=dict(
+                tickformat="%Y-%m-%d", 
+                tickangle=-45,
+                tickmode='array'
+            )
         )
-    )
-    return fig
+        return fig
+    else:
+        fig = go.Figure()
+
+        # Valores reales (pasado)
+        valores_pasado = real['valor_(GWh)']    
+        fig.add_trace(go.Scatter(
+            x=fechas_pasadas,
+            y=valores_pasado,
+            mode='lines',
+            name='Valores Reales (Pasado)',
+            line=dict(color='blue', width=2),
+            marker=dict(size=6)
+        ))
+
+        # Predicciones 1-step
+        fig.add_trace(go.Scatter(
+            x=fechas_futuras,
+            y=pred_1step,
+            mode='lines',
+            name='Predicciones',
+            line=dict(color='red', width=2, dash='dot'),
+            marker=dict(size=6)
+        ))
+
+        # Configuración de la gráfica
+        fig.update_layout(
+            title="Predicciones vs Valores Reales",
+            title_x=0.5,
+            xaxis_title="Fechas",
+            yaxis_title="Demanda (GWh)",
+            template="plotly_white",
+            hovermode="x",
+            xaxis=dict(
+                tickformat="%Y-%m-%d", 
+                tickangle=-45,
+                tickmode='array'
+            )
+        )
+        return fig
 
 def vis_gru(dataframe) -> None:
 
@@ -253,7 +290,6 @@ def vis_gru(dataframe) -> None:
         X, y = crea_secuencias(df, TARGET.name)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-        #redimensiona(X_train, X_test, ventana_seleccionada, n_features)
 
         menu_modelos = ['Recurrent Neural Network (RRN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
 
@@ -303,22 +339,26 @@ def vis_gru(dataframe) -> None:
             pred_1step = predice_prophet(prophet_model, dataframe)
             pred_1step = pred_1step.rename(columns={"ds":"fecha", "yhat":"valor_(GWh)"})
             pred_1step = pred_1step["valor_(GWh)"][:ventana_seleccionada]
-
-            pred_multistep = pred_1step.copy()
   
-            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
+            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step))
 
         st.header("Predicciones")
 
-        if modelo_input !=None:
+        if (modelo_input !=None) & (modelo_input != 'Facebook Propeth'):
             with st.expander(label = f"Predicciones 1-Step", expanded = False):
                 pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
                 pred_1step["Fecha"] = fechas
                 st.dataframe(pred_1step)
-
+            
             with st.expander(label = f"Predicciones MultiStep", expanded = False):
                 pred_multistep = pd.DataFrame({"valor_(GWh)":pred_multistep})
                 pred_multistep["Fecha"] = fechas
                 st.dataframe(pred_multistep)
+
+        elif (modelo_input !=None) & (modelo_input == 'Facebook Propeth'):
+            with st.expander(label = f"Predicciones", expanded = False):
+                pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
+                pred_1step["Fecha"] = fechas
+                st.dataframe(pred_1step)
 
     return None
