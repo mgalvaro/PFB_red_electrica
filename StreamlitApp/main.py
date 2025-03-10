@@ -82,7 +82,7 @@ def main():
     
     with tab3:
 
-        menu = ['Simple Recurrent Neural Network (Simple RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Propeth']
+        menu = ['Simple Recurrent Neural Network (Simple RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
 
         choice = st.selectbox(label='Modelos de predicción de demanda', options=menu, index=None, placeholder="Seleccione modelo ML")
 
@@ -165,7 +165,7 @@ def main():
                 st.image("../ML/MODELS/GRU/GRU_MAE.png")
 
             
-        elif choice == 'Facebook Propeth':
+        elif choice == 'Facebook Prophet':
             st.markdown("""
                         :brain: **Facebook Prophet** es un modelo de predicción de series temporales desarrollado por el equipo de investigación de Facebook. Está diseñado para predecir tendencias futuras utilizando un enfoque basado en regresión aditiva con componentes estacionales, lo que permite modelar patrones complejos de manera automática.  
 
