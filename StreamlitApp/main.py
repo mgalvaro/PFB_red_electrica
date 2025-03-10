@@ -23,7 +23,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 
 def main():
-    st.set_page_config(page_title="APP de datos REE", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
+    # st.set_page_config(page_title="APP de datos REE", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
+    st.set_page_config(**PAGE_CONFIG)
+
     tab1, tab2, tab3, tab4 = st.tabs(["HOME", "EDA", "ML", "ABOUT US"])
 
     try:
