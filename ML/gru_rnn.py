@@ -57,7 +57,10 @@ def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple:
     history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=250, verbose=0)
     
     with open(f"MODELS/GRU/gru_model.pkl", "bw") as file:
-        pickle.dump(model,file)
+        pkl.dump(model,file)
+    with open(f"MODELS/GRU/gru_model_history.pkl", "bw") as file:
+        pkl.dump(history,file)
+        
         return model, history
 
 # Función para graficar loss y mae 
@@ -67,15 +70,14 @@ def grafica_loss_mae(historial) -> None:
                   title='Función de pérdida (loss) basada en el MSE',
                   labels={'index': 'Época', 'value': 'Pérdida'})
     
-    fig.update_layout(title_x=0.5, 
-                      template="plotly_white",
+    fig.update_layout(title_x=0, 
                       legend_title_text="Variables")
     
     fig.for_each_trace(lambda x: x.update(name="Pérdida Entrenamiento" if x.name == "loss" else "Pérdida Validación"))
 
     fig.to_image("../ML/MODELS/GRU/GRU_MAE.webp")
     fig.to_image("../ML/MODELS/GRU/GRU_MAE.png")
-    return None
+    return fig
 
 # Función para predecir 1-step   
 def predice_1step(model, data, scaler, num_dias, len_secuencia=30) -> np.array:  
@@ -151,7 +153,7 @@ def grafica_predicciones(real, pred_1step, pred_multistep=None) -> go.Figure:
             x=fechas_futuras,
             y=pred_1step,
             mode='lines',
-            name='Predicciones 1-step',
+            name='Predicciones inmediatas',
             line=dict(color='red', width=2, dash='dot'),
             marker=dict(size=6)
         ))
@@ -161,7 +163,7 @@ def grafica_predicciones(real, pred_1step, pred_multistep=None) -> go.Figure:
             x=fechas_futuras,
             y=pred_multistep,
             mode='lines',
-            name='Predicciones Multi-step',
+            name='Predicciones en varios pasos',
             line=dict(color='green', width=2, dash='dot'),
             marker=dict(size=6)
         ))
@@ -220,145 +222,3 @@ def grafica_predicciones(real, pred_1step, pred_multistep=None) -> go.Figure:
             )
         )
         return fig
-
-def vis_gru(dataframe) -> None:
-
-    df_filtrado, periodo = vis_demanda(dataframe)
-
-    ventana_seleccionada = None
-    if periodo != 365 and periodo != -1:
-        ver_predicciones = st.checkbox(label="Ver predicciones de demanda", value=False)
-    else:
-        ver_predicciones = False 
-    
-    if ver_predicciones == False:
-
-        zonas = df_filtrado["zona"].unique()
-        fig = go.Figure()
-
-        for zona in zonas:
-            df_historial = df_filtrado[df_filtrado["zona"] == zona] 
-            fig.add_trace(go.Scatter(
-                x=df_historial["fecha"],
-                y=df_historial["valor_(GWh)"],
-                mode='lines',
-                name=zona,
-                line=dict(width=2),
-                marker=dict(size=6)
-            ))
-
-            fig.update_layout(
-                title="Histórico Demanda",
-                title_x=0.5,
-                xaxis_title="Fechas",
-                yaxis_title="Demanda (GWh)",
-                template="plotly_white",
-                hovermode="x",
-                xaxis=dict(
-                    tickformat="%Y-%m-%d", 
-                    tickangle=-45,
-                    tickmode='array'
-                )
-            )
-
-        st.plotly_chart(fig)
-        with st.expander(label = f"DataFrame filtrado para período seleccionado", expanded = False):
-            st.dataframe(df_filtrado)
-        
-    else:
-        st.info("Las predicciones sólo están disponible para territorio nacional")
-
-        df_filtrado = df_filtrado[(df_filtrado['zona'] == 'nacional')] 
-        ventanas_dict = {
-
-            "Próximos 7 días": 7,
-            "Próximos 15 días": 15,
-            "Próximos 30 días": 30,
-        }
-
-        ventana_input = st.selectbox(label = "Selecciona el período",
-                        options = list(ventanas_dict.keys()),
-                        placeholder="Seleccione intervalo de predicción",
-                        index = 0)
-            
-        ventana_seleccionada = ventanas_dict[ventana_input]
-
-        df = procesar_datos(dataframe)
-        df = df.drop(columns="fecha")
-        TARGET = df["valor_(GWh)"]
-        n_features = len([col for col in df.columns if col != TARGET.name])
-        X, y = crea_secuencias(df, TARGET.name)
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-
-        menu_modelos = ['Recurrent Neural Network (RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
-
-        modelo_input = st.selectbox(label="Seleccione modelo de predicción",
-                     options = menu_modelos,
-                     placeholder="Seleccione Modelo ML",
-                     index=None)
-        
-        fechas = [(dataframe["fecha"].max() + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(ventanas_dict[ventana_input])]
-        
-        if modelo_input == 'Recurrent Neural Network (RNN)':
-            
-            with open(f"../ML/MODELS/RNN_LSTM/rnn.pkl", "br") as file:
-                    rnn = pkl.load(file)
-
-            pred_1step = prediction_1step_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
-            pred_multistep = prediction_multistep_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
-
-            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
-
-        elif modelo_input == 'Long Short-Term Memory (LSTM)':
-
-            with open(f"../ML/MODELS/RNN_LSTM/lstm.pkl", "br") as file:
-                    rnn = pkl.load(file)
-
-            pred_1step = prediction_1step_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
-            pred_multistep = prediction_multistep_rnn(X, y_test, scaler, rnn, n_future=ventana_seleccionada)
-
-            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
-
-
-        elif modelo_input == 'Gated Recurrent Unit (GRU)':
-   
-            with open(f"../ML/MODELS/GRU/gru_model.pkl", "br") as file:
-                    gru_model = pkl.load(file)
-    
-            pred_1step = predice_1step(gru_model, X_test, scaler, num_dias=ventana_seleccionada)
-            pred_multistep = predice_multistep(gru_model, X_test, scaler, num_dias=ventana_seleccionada)
-
-            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step, pred_multistep))
-
-        elif modelo_input == 'Facebook Prophet':
-            with open(f"../ML/MODELS/PROPHET/modelo_prophet_con.pkl", "br") as file: 
-                prophet_model = pkl.load(file)
-            prophet_model = prophet_model["modelo"]
-
-            pred_1step = predice_prophet(prophet_model, dataframe)
-            pred_1step = pred_1step.rename(columns={"ds":"fecha", "yhat":"valor_(GWh)"})
-            pred_1step = pred_1step["valor_(GWh)"][:ventana_seleccionada]
-  
-            st.plotly_chart(grafica_predicciones(df_filtrado[-len(y_test):], pred_1step))
-
-        st.header("Predicciones")
-
-        if (modelo_input !=None) & (modelo_input != 'Facebook Prophet'):
-            with st.expander(label = f"Predicciones 1-Step", expanded = False):
-                pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
-                pred_1step["Fecha"] = fechas
-                st.dataframe(pred_1step)
-            
-            with st.expander(label = f"Predicciones MultiStep", expanded = False):
-                pred_multistep = pd.DataFrame({"valor_(GWh)":pred_multistep})
-                pred_multistep["Fecha"] = fechas
-                st.dataframe(pred_multistep)
-
-        elif (modelo_input !=None) & (modelo_input == 'Facebook Prophet'):
-            with st.expander(label = f"Predicciones", expanded = False):
-                pred_1step = pd.DataFrame({"valor_(GWh)":pred_1step})
-                pred_1step["Fecha"] = fechas
-                st.dataframe(pred_1step)
-
-    return None

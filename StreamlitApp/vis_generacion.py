@@ -10,7 +10,7 @@ import plotly.express as px
 from functions.filtros_visualizaciones import *
 
 
-def vis_generacion(df):
+def vis_generacion(df): 
 
     # 4ª gráfica: comparación de la generación por tecnologías
     st.markdown("### :bar_chart: Generación de energía por tecnología")
@@ -18,10 +18,10 @@ def vis_generacion(df):
     col1, col2 = st.columns(2)
 
     with col1:
-        start_date = st.date_input("Fecha de inicio")#.strftime('%Y-%m-%d')
+        start_date = st.date_input("Fecha de inicio", key="start_generacion")#.strftime('%Y-%m-%d')
         
     with col2:
-        end_date = st.date_input("Fecha de fin")#.strftime('%Y-%m-%d')
+        end_date = st.date_input("Fecha de fin",key="end_generacion")#.strftime('%Y-%m-%d')
 
 
     zonas = df['zona'].unique().tolist()

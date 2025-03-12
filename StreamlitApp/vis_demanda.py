@@ -13,23 +13,7 @@ from ML.gru_rnn import *
 from functions.filtros_visualizaciones import *
 
 
-def vis_demanda(df):
-
-    periodos_dict = {
-
-        "Últimos 7 días": 7,
-        "Últimos 30 días": 30,
-        "Últimos 365 días": 365,
-        "Histórico": -1 
-    }
-
-    periodo = st.radio(label = "Selecciona el período",
-                       options = list(periodos_dict.keys()),
-                       index = 0,
-                       disabled = False,
-                       horizontal = True,)
-    
-    periodo_seleccionado = periodos_dict[periodo]
+def vis_demanda(df, periodo_seleccionado):
 
     df_filtered = p7_30_365_hist(df, periodo_seleccionado)
       
@@ -54,8 +38,6 @@ def vis_demanda(df):
         dtick = 4
            
     return df_filtered, periodo_seleccionado
-    
-
 
 if __name__ == "__main__":
     vis_demanda()

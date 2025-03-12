@@ -1,7 +1,7 @@
 from datetime import datetime
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
+#import plotly.graph_objects as go
 
 from config import PAGE_CONFIG
 from PIL import Image
@@ -15,6 +15,7 @@ from social_icons import social_icons
 
 from ML.rnn_lstm import *
 from ML.gru_rnn import *
+from ML.visualiza_predicciones import *
 
 from passwords import pw
 
@@ -23,7 +24,6 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 
 def main():
-    # st.set_page_config(page_title="APP de datos REE", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
     st.set_page_config(**PAGE_CONFIG)
 
     tab1, tab2, tab3, tab4 = st.tabs([":house: INICIO", ":bar_chart: ANALISIS DE DATOS", ":robot_face: MACHINE LEARNING", ":busts_in_silhouette: QUIENES SOMOS"])
@@ -35,7 +35,6 @@ def main():
 
     with tab1:
         st.markdown('### :zap: Bienvenid@ a la App de datos de la REE :zap:')
-
         st.markdown("""
                 #### Este proyecto ofrece una interfaz simple e intuitiva para cualquier persona interesada en el sector eléctrico de España. 
 
@@ -60,28 +59,82 @@ def main():
                     """)
 
     with tab2:
-
         df_demanda = df_demanda[df_demanda['titulo'] == 'Demanda']
+        subtab1, subtab2, subtab3, subtab4 = st.tabs(['Visualiza y predice demanda', 'Mapa de intercambios', 'Comparador anual', 'Visualiza generación por tecnología'])
+
+        with subtab1:
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown(" ### :chart_with_upwards_trend: Visualiza y predice demanda")
+                st.markdown("#### **¿Qué es la demanda?** ")
+                st.markdown("La demanda eléctrica es la cantidad de energía que necesitan hogares, empresas e industrias en un momento dado. Este dato es fundamental para garantizar que haya suficiente suministro de electricidad para satisfacer las necesidades de todos sin interrupciones.")
+                periodos_dict = {
+
+                    "Últimos 7 días": 7,
+                    "Últimos 30 días": 30,
+                    "Últimos 365 días": 365,
+                    "Histórico": -1 
+                }
+
+                periodo = st.radio(label = "Selecciona el período",
+                                key="periodo_demanda",
+                                options = list(periodos_dict.keys()),
+                                index = 0,
+                                disabled = False,
+                                horizontal = True
+                                )
+                
+                periodo_seleccionado = periodos_dict[periodo]
             
-        menu = ['Serie Temporal Demanda', 'Mapa de Intercambios', 'Comparación Anual', 'Generación por tecnología']
+                demanda, periodo = vis_demanda(df_demanda, periodo_seleccionado)
 
-        choice = st.selectbox(label='Menu', options=menu, index=None, placeholder="Seleccione datos a visualizar")
+                ventana_seleccionada = None
+                
+                if periodo != 365 and periodo != -1:
+                    ver_predicciones = st.checkbox(label="Ver predicciones de demanda", value=False)
+                else:
+                    ver_predicciones = False 
 
-        if choice == 'Serie Temporal Demanda':
-            vis_gru(df_demanda)
+                if ver_predicciones:
+                    demanda = demanda[(demanda['zona'] == 'nacional')] 
+                    st.info("Las predicciones sólo están disponible para territorio nacional")
+                    ventanas_dict = {
 
-        elif choice == 'Mapa de Intercambios':
+                        "Próximos 7 días": 7,
+                        "Próximos 15 días": 15,
+                        "Próximos 30 días": 30,
+                    }
+
+                    ventana_input = st.selectbox(label = "Selecciona el período",
+                                    options = list(ventanas_dict.keys()),
+                                    placeholder="Seleccione intervalo de predicción",
+                                    index = 0)    
+                    ventana_seleccionada = ventanas_dict[ventana_input]
+
+                    menu_modelos = ['Recurrent Neural Network (RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
+                    modelo_input = st.selectbox(label="Seleccione modelo de predicción",
+                    options = menu_modelos,
+                    placeholder="Seleccione Modelo ML",
+                    index=None)
+
+            with col2:
+                
+                if ver_predicciones == False:
+                    visualiza_demanda(demanda)
+                
+                elif ver_predicciones == True:
+                    visualiza_predicciones(df_demanda, demanda, ventana_seleccionada, modelo_input)
+
+        with subtab2:
             vis_intercambios(df_intercambios)
 
-        elif choice == 'Comparación Anual':
+        with subtab3:
             vis_compare(df_demanda, df_generacion, df_intercambios)
 
-        elif choice == 'Generación por tecnología':
-            vis_generacion(df_generacion)
-        
-        else:
-            pass
-    
+        with subtab4:
+            vis_generacion(df_generacion) 
+
+   
     with tab3:
 
         menu = ['Simple Recurrent Neural Network (Simple RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
@@ -209,36 +262,36 @@ def main():
         st.markdown("### :zap: ¿Quiénes formamos parte de este proyecto? :zap:")
         st.markdown("")
 
-        col1, col2 = st.columns([2, 1])
-        with col1:
+        subcol1, subcol2 = st.columns([2, 1])
+        with subcol1:
             st.markdown("#### **Álvaro Mejía**:")
             social_icons("alvaro-mejia-garcia", "mgalvaro")
             st.markdown("")
             st.markdown("Ingeniero aeroespacial de formación y actualmente trabajando en la industria médica en Polonia. "
             "Desde hace más de un año, me he estado formando en ciencia de datos para especializarme en este campo y aportar mi experiencia y conocimiento a proyectos innovadores.")
-        with col2:
+        with subcol2:
             img_alvaro = Image.open("imagenes/amg.png")
             st.image(img_alvaro, width=500)
         st.markdown("---")
 
-        col1, col2 = st.columns([2, 1])
-        with col1:
+        subcol1, subcol2 = st.columns([2, 1])
+        with subcol1:
             st.markdown("#### **Ignacio Barba**:")
             social_icons("josé-ignacio-barba-quezada-621975b0", "NachoMijo")
             st.markdown("Comunicador y comercial de profesión, aficionado al mundo tech.")
             st.markdown("Explorando el mundo de la ciencia de datos como un reto.")
-        with col2:
+        with subcol2:
             img_nacho = Image.open("imagenes/ib.png")
             st.image(img_nacho, width=510)
         st.markdown("---")
 
-        col1, col2 = st.columns([2, 1])
-        with col1:
+        subcol1, subcol2 = st.columns([2, 1])
+        with subcol1:
             st.markdown("#### **Javier Corrales**:")
             social_icons("javiercorralesfdez", "javcorrfer")
             st.markdown("")
             st.markdown("""Optometrista con más de 15 años de experiencia y apasionado por la formación continua, me he embarcado en este proyecto para poder especializar mi perfil en el sector.""")
-        with col2:
+        with subcol2:
             img_javi = Image.open("imagenes/jcf.png")
             st.image(img_javi, width=520)
 
