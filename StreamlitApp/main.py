@@ -26,7 +26,7 @@ def main():
     # st.set_page_config(page_title="APP de datos REE", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None)
     st.set_page_config(**PAGE_CONFIG)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["HOME", "EDA", "ML", "ABOUT US"])
+    tab1, tab2, tab3, tab4 = st.tabs([":house: INICIO", ":bar_chart: ANALISIS DE DATOS", ":robot_face: MACHINE LEARNING", ":busts_in_silhouette: QUIENES SOMOS"])
 
     try:
         df_balance, df_demanda, df_generacion, df_intercambios = carga_dataframes(pw["host"], pw["user"], pw["password"], pw["database"])
@@ -43,17 +43,17 @@ def main():
 
                 La app se distribuye en 3 pestañas:
 
-                1. **EDA**
+                1. **ANALISIS DE DATOS**
                     
                     En esta pestaña podrás encontrar visualizaciones y datos sobre la **demanda**, **generacion**, **balance** e **intercambios** energéticos.
 
                     Además, también podrás consultar **predicciones de demanda** con varios modelos de Machine Learning diferentes.
 
-                2. **ML**
+                2. **MACHINE LEARNING**
 
                     En esta pestaña se detalla cada uno de los modelos de Machine Learning usados para las predicciones de demanda.
 
-                3. **ABOUT US**
+                3. **QUIENES SOMOS**
                     
                     Para que nos conozcas un poco más...
 
