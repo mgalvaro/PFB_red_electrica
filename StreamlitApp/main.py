@@ -134,129 +134,124 @@ def main():
         with subtab4:
             vis_generacion(df_generacion) 
 
-   
     with tab3:
-
-        menu = ['Simple Recurrent Neural Network (Simple RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
-
-        choice = st.selectbox(label='Modelos de predicción de demanda', options=menu, index=None, placeholder="Seleccione modelo ML")
-
-        if choice == 'Simple Recurrent Neural Network (Simple RNN)':
-            st.markdown("""
-                        :brain: Una **red neuronal** es un modelo de computación inspirado en cómo funciona el cerebro humano. Está formada por capas de "neuronas" o unidades que procesan la información, ayudando a resolver tareas como el reconocimiento de imágenes o el análisis de texto. 
- 
-                        Una **red neuronal** recurrente es un tipo especial de red donde las conexiones entre las neuronas pueden formar ciclos, lo que permite que la red "recuerde" información de lo que ocurrió antes y la utilice para tomar decisiones en el futuro. Esto es útil para tareas como la traducción automática o la predicción de series temporales, ya que la información anterior tiene importancia. 
- 
-                        Una **RNN simple** es, por tanto, un tipo de red neuronal que aprende de datos que cambian con el tiempo, como es la demanda eléctrica. 
-                        
-                        :large_green_circle: A diferencia de otras redes, recuerda información pasada para hacer mejores predicciones en el futuro.
-                        
-                        :large_red_square: Sin embargo, las RNN simples pueden tener problemas para recordar información a largo plazo, pudiendo perder información importante àra detectar patrones.
-                         """)
-            try:
-                df_metricas = pd.read_csv("../ML/MODELS/RNN_LSTM/metricas_rnn.csv")
-                st.header("Métricas obtenidas")
-                st.dataframe(df_metricas) 
-
-                with open('../ML/MODELS/RNN_LSTM/history_rnn.pkl', 'rb') as f:
-                    history_rnn = pkl.load(f)
-
-                fig_mae_rnn = plot_mae(history_rnn)
-                st.plotly_chart(fig_mae_rnn)
-
-            except FileNotFoundError:
-                st.error("No se ha encontrado ningún archivo relativo a la RNN simple en el sistema, por favor ejecute la pestaña EDA")
-
-        elif choice == 'Long Short-Term Memory (LSTM)':
-            st.markdown("""
-                        :brain: Una **red neuronal** es un modelo de computación inspirado en cómo funciona el cerebro humano. Está formada por capas de "neuronas" o unidades que procesan la información, ayudando a resolver tareas como el reconocimiento de imágenes o el análisis de texto. 
- 
-                        Una **red neuronal recurrente (RNN)** es un tipo especial de red donde las conexiones entre las neuronas pueden formar ciclos, lo que permite que la red "recuerde" información de lo que ocurrió antes y la utilice para tomar decisiones en el futuro. Esto es útil para tareas como la traducción automática o la predicción de series temporales, ya que la información anterior tiene importancia. 
-                         	
-                        :large_green_circle: A diferencia de una RNN simple, la **LSTM** recuerda información importante durante más tiempo, lo que la hace mejor para detectar patrones a largo plazo.
-                        
-                        :large_red_square: Sin embargo, las LSTM son más complejas y requieren más recursos computacionales que las RNN simples. Necesitan más datos para ser entrenadas y es más difícil de interpretar cómo toman decisiones.
-
-                         """)
-            try:
-                df_metricas = pd.read_csv("../ML/MODELS/RNN_LSTM/metricas_lstm.csv")
-                st.header("Métricas obtenidas")
-                st.dataframe(df_metricas)
-
-                with open('../ML/MODELS/RNN_LSTM/history_lstm.pkl', 'rb') as f:
-                    history_lstm = pkl.load(f)
-
-                fig_mae_lstm = plot_mae(history_lstm)
-                st.plotly_chart(fig_mae_lstm)
-
-                #with st.expander("Representación LOSS-MSE en entrenamientos previos"):
-                #    st.markdown("#### Función de pérdida-mse")
-                #    st.image("../ML/MODELS/GRU/GRU_MAE.png") 
-
-            except FileNotFoundError:
-                st.error("No se ha encontrado ningún archivo relativo a la LSTM en el sistema, por favor ejecute la pestaña EDA")
-
-        elif choice == 'Gated Recurrent Unit (GRU)':
-            st.markdown("""
-                        :brain: Una **red neuronal** es un modelo de computación inspirado en cómo funciona el cerebro humano. Está formada por capas de "neuronas" o unidades que procesan la información, ayudando a resolver tareas como el reconocimiento de imágenes o el análisis de texto. 
- 
-                        Una **red neuronal** recurrente es un tipo especial de red donde las conexiones entre las neuronas pueden formar ciclos, lo que permite que la red "recuerde" información de lo que ocurrió antes y la utilice para tomar decisiones en el futuro. Esto es útil para tareas como la traducción automática o la predicción de series temporales, ya que la información anterior tiene importancia. 
- 
-                        Las **redes GRU (Gated Recurrent Unit)** son un tipo de red neuronal recurrente que utiliza un mecanismo para controlar mejor cómo se "recuerda" o "olvida" la información. 
-                        
-                        :large_green_circle: Se diferencian de otras redes recurrentes, como las LSTM, porque son más simples y requieren menos recursos computacionales, manteniendo un rendimiento similar en muchas aplicaciones.
-                        
-                        :large_red_square: Sin embargo, no es tan buena como las LSTM para recordar patrones a largo plazo.
-                         
-                         """)
-            
-            with st.expander("Métricas obtenidas"):
-     
-                df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
-                st.dataframe(df_metricas)                
-
-            with st.expander("Representación LOSS-MSE en entrenamientos previos"):
-                st.markdown("#### Función de pérdida-mse")
-                st.image("../ML/MODELS/GRU/GRU_MAE.png")
-
-            
-        elif choice == 'Facebook Prophet':
-            st.markdown("""
-                        :brain: **Facebook Prophet** es un modelo de predicción de series temporales desarrollado por el equipo de investigación de Facebook. Está diseñado para predecir tendencias futuras utilizando un enfoque basado en regresión aditiva con componentes estacionales, lo que permite modelar patrones complejos de manera automática.  
-
-                        Prophet es especialmente útil para trabajar con datos que presentan tendencias no lineales, efectos estacionales y eventos especiales como festivos o cambios estructurales en la serie temporal.  
-
-                        Una de las principales ventajas de Prophet es su capacidad para manejar valores atípicos y datos faltantes sin necesidad de preprocesamiento exhaustivo, lo que lo convierte en una herramienta flexible y fácil de usar.  
-
-                        :large_green_circle: A diferencia de otros modelos tradicionales de series temporales, Prophet no requiere que el usuario ajuste manualmente los parámetros de tendencia o estacionalidad, ya que el modelo los aprende automáticamente a partir de los datos históricos.  
-
-                        :large_red_square: Sin embargo, Prophet puede no ser la mejor opción cuando se trata de datos con patrones altamente irregulares o cambios abruptos que no siguen una estructura definida, ya que su enfoque basado en tendencias suaves puede generar predicciones menos precisas en estos casos. 
-                         
-                         """)
-
-            with st.expander("Métricas obtenidas"):
-                df_metricas = pd.read_csv("../ML/MODELS/PROPHET/evaluacion_modelo_train.csv")
-                st.dataframe(df_metricas)      
-
-                df_metricas_comparadas = pd.read_csv("../ML/MODELS/PROPHET/predicciones_comparacion_prophet.csv")
-                st.dataframe(df_metricas_comparadas)
-                
-
-            with st.expander("Representación de las diferentes granularidades del modelo Prophet"):
-                st.markdown("##### Día a día")
-                st.image("../ML/MODELS/PROPHET/prophet_vis_Día a día.png")
-
-                st.markdown("##### Mes a mes")
-                st.image("../ML/MODELS/PROPHET/prophet_vis_Mes a mes.png")
-
-                st.markdown("##### Semana a semana")
-                st.image("../ML/MODELS/PROPHET/prophet_vis_Semana a semana.png")
-
-                st.markdown("##### Trimestre a trimestre")
-                st.image("../ML/MODELS/PROPHET/prophet_vis_Trimestre a trimestre.png")
         
-        else:
-            pass
+        st.markdown("#### **¿Qué son los modelos de machine learning en energía?** ")
+        st.markdown("El machine learning es una rama de la inteligencia artificial que permite a las máquinas aprender de los datos y mejorar su desempeño sin necesidad de ser programadas explícitamente. En el sector energético, se utiliza para analizar grandes volúmenes de información y realizar tareas como predecir la demanda eléctrica, optimizar la generación de energía o detectar fallos en la red, contribuyendo a una gestión más eficiente y sostenible.")  
+        st.markdown("""Dentro del machine learning, las redes neuronales destacan por estar inspiradas en el funcionamiento del cerebro humano. Estas están formadas por capas de "neuronas" que procesan la información, lo que las hace especialmente útiles para resolver problemas complejos como el análisis de series temporales en energía, ayudando a predecir tendencias y tomar decisiones más acertadas para garantizar la estabilidad del sistema eléctrico..
+                      En este proyecto hemos usado 4 tipos diferentes que puedes explorar con el selector abajo:""")
+        
+        subcol1, subcol2 = st.columns(2)
+        with subcol1:
+            
+            menu = ['Simple Recurrent Neural Network (Simple RNN)', 'Long Short-Term Memory (LSTM)', 'Gated Recurrent Unit (GRU)', 'Facebook Prophet']
+
+            choice = st.selectbox(label="Modelos ML", options=menu, index=None, placeholder="Seleccione modelo ML")
+
+            if choice == 'Simple Recurrent Neural Network (Simple RNN)':
+                st.markdown("""
+                            :brain: Una **RNN simple** es un tipo de red neuronal que aprende de datos que cambian con el tiempo, como es la demanda eléctrica. 
+                            
+                            :large_green_circle: A diferencia de otras redes, recuerda información pasada para hacer mejores predicciones en el futuro.
+                            
+                            :large_red_square: Sin embargo, las RNN simples pueden tener problemas para recordar información a largo plazo, pudiendo perder información importante àra detectar patrones.
+                            """)
+                with subcol2:
+                    try:
+                        df_metricas = pd.read_csv("../ML/MODELS/RNN_LSTM/metricas_rnn.csv")
+                        st.markdown("#### Métricas obtenidas")
+                        st.dataframe(df_metricas) 
+
+                        with open('../ML/MODELS/RNN_LSTM/history_rnn.pkl', 'rb') as f:
+                            history_rnn = pkl.load(f)
+
+                        st.markdown("#### Función de pérdida-mse")
+                        fig_mae_rnn = plot_mae(history_rnn)
+                        st.plotly_chart(fig_mae_rnn)
+
+                    except FileNotFoundError:
+                        st.error("No se ha encontrado ningún archivo relativo a la RNN simple en el sistema, por favor ejecute la pestaña EDA")
+
+            elif choice == 'Long Short-Term Memory (LSTM)':
+                st.markdown("""
+                            :brain: Una **red neuronal LSTM** es un tipo especial de RNN con una estructura interna más compleja. 
+                                
+                            :large_green_circle: A diferencia de una RNN simple, la **LSTM** recuerda información importante durante más tiempo, lo que la hace mejor para detectar patrones a largo plazo.
+                            
+                            :large_red_square: Sin embargo, al ser más complejas, requieren más recursos computacionales que las RNN simples. Necesitan más datos para ser entrenadas y es más difícil de interpretar cómo toman decisiones.
+
+                            """)
+                with subcol2:
+                    try:
+                        df_metricas = pd.read_csv("../ML/MODELS/RNN_LSTM/metricas_lstm.csv")
+                        st.markdown("#### Métricas obtenidas")
+                        st.dataframe(df_metricas)
+
+                        with open('../ML/MODELS/RNN_LSTM/history_lstm.pkl', 'rb') as f:
+                            history_lstm = pkl.load(f)
+
+                        st.markdown("#### Función de pérdida-mse")
+                        fig_mae_lstm = plot_mae(history_lstm)
+                        st.plotly_chart(fig_mae_lstm)
+
+                        #with st.expander("Representación LOSS-MSE en entrenamientos previos"):
+                        #    st.markdown("#### Función de pérdida-mse")
+                        #    st.image("../ML/MODELS/GRU/GRU_MAE.png") 
+
+                    except FileNotFoundError:
+                        st.error("No se ha encontrado ningún archivo relativo a la LSTM en el sistema, por favor ejecute la pestaña EDA")
+
+            elif choice == 'Gated Recurrent Unit (GRU)':
+                st.markdown("""
+                            :brain: Una **red neuronal GRU** es un tipo especial de RNN muy parecida a las LSTM, pero menos compleja.
+                            
+                            :large_green_circle: Se diferencian de otras redes recurrentes, como las LSTM, porque son más simples y requieren menos recursos computacionales, manteniendo un rendimiento similar en muchas aplicaciones.
+                            
+                            :large_red_square: Sin embargo, no es tan buena como las LSTM para recordar patrones a largo plazo.
+                            
+                            """)
+                with subcol2:
+                    df_metricas = pd.read_csv("../ML/MODELS/GRU/MetricasGRU.csv")
+                    st.markdown("#### Métricas obtenidas")
+                    st.dataframe(df_metricas)                
+
+                    st.markdown("#### Función de pérdida-mse")
+                    st.image("../ML/MODELS/GRU/GRU_MAE.png")
+
+                
+            elif choice == 'Facebook Prophet':
+                st.markdown("""
+                            :brain: **Facebook Prophet** es un modelo de predicción de series temporales desarrollado por el equipo de investigación de Facebook. Está diseñado para predecir tendencias futuras utilizando un enfoque basado en regresión aditiva con componentes estacionales, lo que permite modelar patrones complejos de manera automática.  
+
+                            Prophet es especialmente útil para trabajar con datos que presentan tendencias no lineales, efectos estacionales y eventos especiales como festivos o cambios estructurales en la serie temporal.  
+
+                            Una de las principales ventajas de Prophet es su capacidad para manejar valores atípicos y datos faltantes sin necesidad de preprocesamiento exhaustivo, lo que lo convierte en una herramienta flexible y fácil de usar.  
+
+                            :large_green_circle: A diferencia de otros modelos tradicionales de series temporales, Prophet no requiere que el usuario ajuste manualmente los parámetros de tendencia o estacionalidad, ya que el modelo los aprende automáticamente a partir de los datos históricos.  
+
+                            :large_red_square: Sin embargo, Prophet puede no ser la mejor opción cuando se trata de datos con patrones altamente irregulares o cambios abruptos que no siguen una estructura definida, ya que su enfoque basado en tendencias suaves puede generar predicciones menos precisas en estos casos. 
+                            
+                            """)
+                with subcol2:
+                    st.markdown("#### Métricas obtenidas")
+                    df_metricas = pd.read_csv("../ML/MODELS/PROPHET/evaluacion_modelo_train.csv")
+                    st.dataframe(df_metricas)      
+
+                    df_metricas_comparadas = pd.read_csv("../ML/MODELS/PROPHET/predicciones_comparacion_prophet.csv")
+                    st.dataframe(df_metricas_comparadas)
+                        
+                    st.markdown("#### Representación de las diferentes granularidades del modelo Prophet")
+                    st.markdown("##### Día a día")
+                    st.image("../ML/MODELS/PROPHET/prophet_vis_Día a día.png")
+                    st.markdown("##### Mes a mes")
+                    st.image("../ML/MODELS/PROPHET/prophet_vis_Mes a mes.png")
+                    st.markdown("##### Semana a semana")
+                    st.image("../ML/MODELS/PROPHET/prophet_vis_Semana a semana.png")
+                    st.markdown("##### Trimestre a trimestre")
+                    st.image("../ML/MODELS/PROPHET/prophet_vis_Trimestre a trimestre.png")
+            
+            else:
+                pass
     
     with tab4:
         st.markdown("### :zap: ¿Quiénes formamos parte de este proyecto? :zap:")
