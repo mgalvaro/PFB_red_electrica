@@ -266,7 +266,7 @@ def main():
             "Desde hace más de un año, me he estado formando en ciencia de datos para especializarme en este campo y aportar mi experiencia y conocimiento a proyectos innovadores.")
         with subcol2:
             img_alvaro = Image.open("imagenes/amg.png")
-            st.image(img_alvaro, width=300)
+            st.image(img_alvaro, width=250)
         st.markdown("---")
 
         subcol1, subcol2 = st.columns([2, 1])
@@ -277,7 +277,7 @@ def main():
             st.markdown("Explorando el mundo de la ciencia de datos como un reto.")
         with subcol2:
             img_nacho = Image.open("imagenes/ib.png")
-            st.image(img_nacho, width=300)
+            st.image(img_nacho, width=250)
         st.markdown("---")
 
         subcol1, subcol2 = st.columns([2, 1])
@@ -288,7 +288,7 @@ def main():
             st.markdown("""Optometrista con más de 15 años de experiencia y apasionado por la formación continua, me he embarcado en este proyecto para poder especializar mi perfil en el sector.""")
         with subcol2:
             img_javi = Image.open("imagenes/jcf.png")
-            st.image(img_javi, width=300)
+            st.image(img_javi, width=250)
 
       
 if __name__ == '__main__':
