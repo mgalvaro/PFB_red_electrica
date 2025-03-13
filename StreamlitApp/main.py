@@ -138,7 +138,7 @@ def main():
         
         st.markdown("#### **¿Qué son los modelos de machine learning en energía?** ")
         st.markdown("El machine learning es una rama de la inteligencia artificial que permite a las máquinas aprender de los datos y mejorar su desempeño sin necesidad de ser programadas explícitamente. En el sector energético, se utiliza para analizar grandes volúmenes de información y realizar tareas como predecir la demanda eléctrica, optimizar la generación de energía o detectar fallos en la red, contribuyendo a una gestión más eficiente y sostenible.")  
-        st.markdown("""Dentro del machine learning, las redes neuronales destacan por estar inspiradas en el funcionamiento del cerebro humano. Estas están formadas por capas de "neuronas" que procesan la información, lo que las hace especialmente útiles para resolver problemas complejos como el análisis de series temporales en energía, ayudando a predecir tendencias y tomar decisiones más acertadas para garantizar la estabilidad del sistema eléctrico..
+        st.markdown("""Dentro del machine learning, las redes neuronales destacan por estar inspiradas en el funcionamiento del cerebro humano. Estas están formadas por capas de "neuronas" que procesan la información, lo que las hace especialmente útiles para resolver problemas complejos como el análisis de series temporales en energía, ayudando a predecir tendencias y tomar decisiones más acertadas para garantizar la estabilidad del sistema eléctrico.
                       En este proyecto hemos usado 4 tipos diferentes que puedes explorar con el selector abajo:""")
         
         subcol1, subcol2 = st.columns(2)
@@ -154,7 +154,7 @@ def main():
                             
                             :large_green_circle: A diferencia de otras redes, recuerda información pasada para hacer mejores predicciones en el futuro.
                             
-                            :large_red_square: Sin embargo, las RNN simples pueden tener problemas para recordar información a largo plazo, pudiendo perder información importante àra detectar patrones.
+                            :large_red_square: Sin embargo, las RNN simples pueden tener problemas para recordar información a largo plazo, pudiendo perder información importante para detectar patrones.
                             """)
                 with subcol2:
                     try:
