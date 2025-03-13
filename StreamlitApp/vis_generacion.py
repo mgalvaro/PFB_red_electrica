@@ -20,8 +20,8 @@ def vis_generacion(df):
         st.markdown("#### **¿Qué es la generación?** ")
         st.markdown("La generación eléctrica es el proceso mediante el cual se produce la electricidad que usamos diariamente. Puede provenir de fuentes renovables, como el sol y el viento, o de fuentes tradicionales, como el gas natural o el carbón. Cada tipo de fuente tiene un papel importante en garantizar un suministro constante.")
         st.markdown("**Gráfico 1:** Representa el aporte de generación de cada tipo de energía en la zona e intervalo seleccionados.")
-        st.markdown("**Gráfico 2:** Representa la misma información pero en un gráfico de pastel.")
-        st.markdown("**Gráfico 3:** Representa la misma información pero en un gráfico de pastel agrupado por renovable y no renovable.")
+        st.markdown("**Gráfico 2:** Representa el aporte de cada tecnología en un gráfico de pastel.")
+        st.markdown("**Gráfico 3:** Representa el aporte de cada tecnología en un gráfico de pastel agrupado por renovable y no renovable.")
         start_date = st.date_input("Fecha de inicio", key="start_generacion")
         end_date = st.date_input("Fecha de fin",key="end_generacion")
 
