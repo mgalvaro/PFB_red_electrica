@@ -84,7 +84,7 @@ def vis_compare(df_demanda, df_generacion, df_intercambios):
                     y='valor_(GWh)',
                     color='año',
                     title=f"<b>{variable.title()}</b> nacional de energía a lo largo del año para {year1} y {year2} (media semanal)",
-                    labels={'fecha_sin_year': 'Fecha', 'valor_(GWh)': 'Generación (GWh)', 'año': 'Año'},
+                    labels={'fecha_sin_year': 'Fecha', 'valor_(GWh)': f'{variable} (GWh)', 'año': 'Año'},
                     line_dash=ldash,
                     color_discrete_sequence=["#32CD32", "#8B00FF"]
                     )
