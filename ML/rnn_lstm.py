@@ -18,9 +18,9 @@ from StreamlitApp.functions.carga_dataframes import *
 from StreamlitApp.passwords import pw
 from ML.escalado_datos import *
 
-from keras.layers import Input, SimpleRNN, Dense, Dropout, LSTM, GlobalMaxPool1D # type: ignore
+from keras.layers import Input, SimpleRNN, Dense, Dropout, LSTM, GlobalMaxPool1D, GlobalAveragePooling1D # type: ignore
 from keras.models import Sequential # type: ignore
-from keras.optimizers import Adam # type: ignore
+from keras.optimizers import Adam, Nadam # type: ignore
 from tensorflow.keras.callbacks import EarlyStopping # type: ignore
 
 with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br") as file:
@@ -49,21 +49,20 @@ def train_test(X, y, f=0.8):
 #---------------------------------------------------------------------------------------------------------
 # modelos de RNN y LSTM
 
-def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"]):
+def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"], batch_size=32):
 
     model_rnn = Sequential([
-        Input(shape = (lookback, X.shape[2])),
+        Input(shape=(lookback, X.shape[2])),
 
-        SimpleRNN(128, activation="relu"),  # Capa recurrente
-        Dropout(0.2),  # Regularización
+        SimpleRNN(128, activation="relu", return_sequences=False),  
 
-        Dense(64, activation="relu"),  # Capas ocultas
-        Dropout(0.2),  # Regularización
+        Dense(64, activation="relu"),  
+        Dropout(0.1),
 
-        Dense(32, activation="relu"),  # Capas ocultas
-        
-        Dense(1)  # Capa de salida para predecir la demanda
-        ])
+        Dense(32, activation="relu"),
+
+        Dense(1)
+    ])
     
     model_rnn.compile(optimizer=Adam(learning_rate=lr), loss = loss, metrics = metrics)
 
@@ -71,6 +70,7 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr
                              y = y_train, 
                              validation_data = (X_val, y_val), 
                              epochs = epochs,
+                             batch_size = batch_size,
                              verbose=1
                              )
     
@@ -80,28 +80,30 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr
     return model_rnn, history
 
 
-def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"]):
+def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"], batch_size=32):
 
     model_lstm = Sequential([
-        Input(shape=(lookback, X.shape[2])),  
+        Input(shape=(lookback, X.shape[2])),
 
-        LSTM(128, activation="relu", return_sequences=True), 
-        GlobalMaxPool1D(),
+        LSTM(128, activation="tanh", return_sequences=True, dropout=0.2, recurrent_dropout=0.2),
+        LSTM(64, activation="tanh", return_sequences=True, dropout=0.2, recurrent_dropout=0.2),
+        GlobalAveragePooling1D(),  # Agregamos la capa de pooling para reducir dimensionalidad
 
-        Dense(64, activation="relu"),  
-        Dropout(0.2),  
+        Dense(64, activation="relu"),
+        Dropout(0.3),
 
-        Dense(32, activation="relu"),  
+        Dense(32, activation="relu"),
 
-        Dense(1) 
+        Dense(1)  # Capa de salida
     ])
 
-    model_lstm.compile(optimizer=Adam(learning_rate=lr), loss=loss, metrics=metrics)
+    model_lstm.compile(optimizer=Nadam(learning_rate=lr), loss=loss, metrics=metrics)
 
     history = model_lstm.fit(x = X_train, 
                              y = y_train, 
                              validation_data = (X_val, y_val), 
                              epochs = epochs,
+                             batch_size = batch_size,
                              verbose=1
                              )
     
