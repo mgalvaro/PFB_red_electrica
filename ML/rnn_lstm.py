@@ -57,7 +57,7 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr
         SimpleRNN(128, activation="relu", return_sequences=False),  
 
         Dense(64, activation="relu"),  
-        Dropout(0.1),
+        Dropout(0.2),
 
         Dense(32, activation="relu"),
 
@@ -90,7 +90,7 @@ def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, l
         GlobalAveragePooling1D(),  # Agregamos la capa de pooling para reducir dimensionalidad
 
         Dense(64, activation="relu"),
-        Dropout(0.3),
+        Dropout(0.2),
 
         Dense(32, activation="relu"),
 
