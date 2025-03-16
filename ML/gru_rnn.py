@@ -29,20 +29,14 @@ with open("../data/data_scaled/scalers/scaler_consumo_anio_DF_DEMANDA.pkl", "br"
     scaler = pkl.load(file)
 
 # Función para crear secuencias
-def crea_secuencias(dataframe, target_col, len_secuencia=30) -> tuple:
+def crea_secuencias(dataframe, target_col, len_secuencia=15) -> tuple:
     X, y = [], []
     for i in range(len(dataframe) - len_secuencia):
         X.append(dataframe.iloc[i:i+len_secuencia].drop(columns=[target_col]).values) 
         y.append(dataframe.iloc[i+len_secuencia][target_col]) 
     return np.array(X), np.array(y)
 
-# Función para redimensionar las secuencias
-def redimensiona(xtrain, xtest, ventana, n_features) -> str:
-    xtrain = xtrain.reshape((xtrain.shape[0], ventana, n_features))  
-    xtest = xtest.reshape((xtest.shape[0], ventana, n_features)) 
-    return f"X_train shape: {xtrain.shape}, X_test shape: {xtest.shape}"
-
-def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple: #--  agregar metricas en un df
+def crea_gru(input_shape, xtrain, xtest, ytrain, ytest, len_secuencia=15, epochs=1500) -> tuple: #--  agregar metricas en un df
     model = Sequential([
         Input(shape=(len_secuencia, input_shape)),
         GRU(64, activation='tanh'),  
@@ -52,10 +46,8 @@ def crea_gru(input_shape, len_secuencia, xtrain, xtest, ytrain, ytest) -> tuple:
         Dense(1, activation='linear') 
     ])
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
-    #early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    #history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=100, verbose=0, callbacks=[early_stopping])  2500 epochs sin early probar
-    history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=250, verbose=0)
-    
+    history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=epochs, verbose=0)
+
     with open(f"MODELS/GRU/gru_model.pkl", "bw") as file:
         pkl.dump(model,file)
     with open(f"MODELS/GRU/gru_model_history.pkl", "bw") as file:
@@ -80,7 +72,7 @@ def grafica_loss_mae(historial) -> None:
     return fig
 
 # Función para predecir 1-step   
-def predice_1step(model, data, scaler, num_dias, len_secuencia=30) -> np.array:  
+def predice_1step(model, data, scaler, num_dias, len_secuencia=15) -> np.array:  
     validation_predictions = []
     
     i = -num_dias
@@ -97,7 +89,7 @@ def predice_1step(model, data, scaler, num_dias, len_secuencia=30) -> np.array:
     return predictions_desescalado
 
 # Función para predecir multi-step
-def predice_multistep(model, data, scaler, num_dias, len_secuencia=30) -> np.array:
+def predice_multistep(model, data, scaler, num_dias, len_secuencia=15) -> np.array:
     predictions = []
     input_seq = data[-1].reshape(1, len_secuencia, data.shape[2])
     

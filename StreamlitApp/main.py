@@ -194,10 +194,6 @@ def main():
                         fig_mae_lstm = plot_mae(history_lstm)
                         st.plotly_chart(fig_mae_lstm)
 
-                        #with st.expander("Representación LOSS-MSE en entrenamientos previos"):
-                        #    st.markdown("#### Función de pérdida-mse")
-                        #    st.image("../ML/MODELS/GRU/GRU_MAE.png") 
-
                     except FileNotFoundError:
                         st.error("No se ha encontrado ningún archivo relativo a la LSTM en el sistema, por favor ejecute la pestaña EDA")
 
@@ -215,8 +211,12 @@ def main():
                     st.markdown("#### Métricas obtenidas")
                     st.dataframe(df_metricas)                
 
+                    with open('../ML/MODELS/GRU/gru_model_history.pkl', 'rb') as f:
+                        history_gru = pkl.load(f)
+
                     st.markdown("#### Función de pérdida-mse")
-                    st.image("../ML/MODELS/GRU/GRU_MAE.png")
+                    fig_mae_gru = plot_mae(history_gru)
+                    st.plotly_chart(fig_mae_gru)
 
                 
             elif choice == 'Facebook Prophet':
