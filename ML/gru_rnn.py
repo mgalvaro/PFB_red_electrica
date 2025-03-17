@@ -37,15 +37,20 @@ def crea_secuencias(dataframe, target_col, len_secuencia=15) -> tuple:
     return np.array(X), np.array(y)
 
 def crea_gru(input_shape, xtrain, xtest, ytrain, ytest, len_secuencia=15, epochs=1500) -> tuple: #--  agregar metricas en un df
+    # Yo probaría algo similar a esto (ignoren los números de neuronas, eso está sujeto a ensayo y error):
     model = Sequential([
         Input(shape=(len_secuencia, input_shape)),
-        GRU(64, activation='tanh'),  
-        Dropout(0.3), 
-        Dense(1, activation='relu'),
-        Dropout(0.3),
-        Dense(1, activation='linear') 
+        GRU(128, activation='tanh'), # Capa de procesamiento recurrente, responsable de interpretar la secuencialidad de los datos
+        Dense(64, activation='relu'), # Capas de procesamiento MLP, el "cerebro" de la red neuronal
+        Dropout(0.3), # Funcinarán unas 45 neuronas
+        Dense(32, activation='relu'),
+        Dropout(0.2), # Funcionarán unas 25 neuronas
+        Dense(16, activation='relu'),
+        Dropout(0.1), # Funcionarán unas 14 neuronas
+        Dense(1, activation='linear') # No sería mala idea probar con ReLU en esta última capa, ya que nuestra respuesta no puede ser negativa
     ])
-    model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+
+    model.compile(optimizer='adam', loss='mse', metrics=['mae']) # Sería buena idea meter más métricas como rmse o mae para mejor interpretabilidad
     history = model.fit(x=xtrain, y=ytrain, validation_data=(xtest, ytest), epochs=epochs, verbose=0)
 
     with open(f"MODELS/GRU/gru_model.pkl", "bw") as file:
