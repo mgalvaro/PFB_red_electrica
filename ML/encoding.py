@@ -32,7 +32,9 @@ def encoder(df_filtrado):
     dia_cos = []
 
     for i, row in df_filtrado.iterrows():
-
+        # 1900 % 4 != 0 -> False. 1900 NO fue un año bisiesto, ya que es divisible entre 100.
+        # A efectos prácticos no importa, porque no tenemos datos de tan atrás, tampoco es que este proyecto sobreviva hasta 2100, y
+        # el año 2000 SÍ fue bisiesto porque es divisble entre 400. Pero tengan cuidado con esto, que tarde o temprano peta.
         if row['mes'] != 2 or row['año'] % 4 != 0:  # tiene en cuenta meses distintos a febrero, o febrero en un año no bisiesto
             dia_sin.append(np.sin(2 * np.pi * row['dia'] / n_dias[row['mes']]))
             dia_cos.append(np.cos(2 * np.pi * row['dia'] / n_dias[row['mes']]))
