@@ -81,19 +81,20 @@ def get_model_rnn(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr
 
 
 def get_model_lstm(X, X_train, X_val, y_train, y_val, lookback=30, epochs=100, lr=0.001, loss="mse", metrics=["mae"], batch_size=32):
-
+    # Sería interesante probar algunas de estas técnicas que he introducido.
     model_lstm = Sequential([
         Input(shape=(lookback, X.shape[2])),
 
-        LSTM(128, activation="tanh", return_sequences=True, dropout=0.2, recurrent_dropout=0.2),
-        LSTM(64, activation="tanh", return_sequences=True, dropout=0.2, recurrent_dropout=0.2),
+        # Añado activación recurrente y cambio la principal a ReLU
+        LSTM(128, activation="relu", return_sequences=True, dropout=0.2, recurrent_dropout=0.2, recurrent_activation="tanh"),
         GlobalAveragePooling1D(),  # Agregamos la capa de pooling para reducir dimensionalidad
 
+        Dense(128, activation="relu"),
+        Dropout(0.3),
         Dense(64, activation="relu"),
         Dropout(0.2),
-
         Dense(32, activation="relu"),
-
+        Dropout(0.1),
         Dense(1)  # Capa de salida
     ])
 
