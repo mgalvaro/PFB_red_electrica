@@ -12,15 +12,15 @@ The app offers deep insights into:
 ## 📚 Stack
 Python · Streamlit · Pandas · SQL · Plotly · REE API · TensorFlow/Keras · Scikit-learn
 
-## 🛠️ Use instructions / Instrucciones de uso
-🛠️ How to use the app:
+## 🛠️ How to use the app:
 1. The app loads the data from a MySQL local database that has to be created and populated. Go to src > database and execute the following files:
     - "1. CREACION_BBDD.ipynb" -> Creates the DB
     - "2. POBLACION_bbdd.ipynb" -> Populates the DB
 
 2. Once the DB is created and filled up, the app is ready to be used. In the terminal, execute the file "main.py" located in the directory "StreamlitApp":
-<br>
-    cd StreamlitApp
+
+    cd StreamlitApp 
+    <br>
     streamlit run main.py
 
 ## 📲 Demo & details
